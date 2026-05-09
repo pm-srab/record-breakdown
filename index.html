@@ -120,7 +120,7 @@ h3 {
     </a>
     <a href="close7mean.html" class="btn-menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        ปิดรหัส 7 mean
+        ปิดรหัส 7 mean,ปิดงานค้าง
     </a>
 </div>
 
@@ -172,14 +172,15 @@ h3 {
         const pressNoti = document.getElementById('pressNoti');
         const assyNoti = document.getElementById('assyNoti');
         
+        // Count ONLY "Open Work"
         const pressPending = breakdowns.filter(r => {
-            const isPending = !r.sevenMean || String(r.sevenMean).trim() === "" || r.sevenMean === "-";
-            return isPending && r.department === "Press";
+            const isOpenWork = !r.finishTime || r.finishTime === "-" || String(r.finishTime).trim() === "";
+            return isOpenWork && r.department === "Press";
         });
         
         const assyPending = breakdowns.filter(r => {
-            const isPending = !r.sevenMean || String(r.sevenMean).trim() === "" || r.sevenMean === "-";
-            return isPending && r.department === "Ass'y";
+            const isOpenWork = !r.finishTime || r.finishTime === "-" || String(r.finishTime).trim() === "";
+            return isOpenWork && r.department === "Ass'y";
         });
         
         if (pressPending.length > 0) {

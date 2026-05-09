@@ -181,13 +181,104 @@
             font-weight: 600;
             line-height: 1.5;
         }
+
+        /* Control Center Styles */
+        .control-center {
+            display: flex;
+            background-color: rgba(255,255,255,0.05);
+            padding: 6px;
+            border-radius: 14px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            color: #777;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+        }
+
+        .control-btn.active {
+            background-color: #007BFF;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Closing Form Styles */
+        .closing-form {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-field label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .form-field input, .form-field textarea {
+            width: 100%;
+            background-color: #0d1a33;
+            border: 1px solid #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-submit-close {
+            background: linear-gradient(135deg, #2ed573, #7bed9f);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-submit-close:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="main-content">
         <div class="header">
-            <h1>รายการรอปิดรหัส 7 mean</h1>
+            <h1>จัดการงานค้าง</h1>
             <a href="index.html" class="btn-back">กลับหน้าหลัก</a>
+        </div>
+
+        <div class="control-center">
+            <button class="control-btn active" id="tabSevenMean" onclick="switchTab('sevenMean')">ปิดรหัส 7 mean</button>
+            <button class="control-btn" id="tabPending" onclick="switchTab('pending')">ปิดงานค้าง</button>
         </div>
 
         <div id="recordsList">
@@ -261,60 +352,211 @@
             return timeStr;
         }
 
-        function loadPendingRecords() {
+        let currentTab = 'sevenMean';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabSevenMean').classList.toggle('active', tab === 'sevenMean');
+            document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+            loadRecords();
+        }
+
+        async function loadRecords() {
             const list = document.getElementById('recordsList');
             let breakdowns = [];
             
+            // 1. Show local data first
             try {
                 const data = localStorage.getItem("breakdowns");
-                if (data) {
-                    breakdowns = JSON.parse(data);
+                if (data) breakdowns = JSON.parse(data);
+            } catch (err) { console.error(err); }
+
+            renderByTab(breakdowns, list);
+
+            // 2. Fetch fresh data from Google Sheets
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const googleData = await response.json();
+                if (googleData && Array.isArray(googleData)) {
+                    const validRows = googleData.filter(row => row[0] && row[2]);
+                    const cloudBreakdowns = validRows.map((row, index) => ({
+                        date: row[0], line: row[1], machineId: row[2], caseCount: 1,
+                        time: row[3], finishTime: row[4], duration: row[5], department: row[6],
+                        problem: row[7], solution: row[8], sparePart: row[9], sevenMean: row[10],
+                        id: index
+                    }));
+                    localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
+                    renderByTab(cloudBreakdowns, list);
                 }
-            } catch (err) {
-                console.error("Error loading records:", err);
+            } catch (e) { console.error("Fetch error:", e); }
+        }
+
+        function renderByTab(breakdowns, list) {
+            if (currentTab === 'sevenMean') {
+                // Filter: Finished work but missing 7-mean
+                const pending = breakdowns.filter(r => {
+                    const isFinished = r.finishTime && r.finishTime !== "-" && String(r.finishTime).trim() !== "";
+                    const missingSeven = !r.sevenMean || r.sevenMean === "-" || String(r.sevenMean).trim() === "";
+                    return isFinished && missingSeven;
+                });
+                renderSevenMeanTab(pending, list);
+            } else {
+                // Filter: Open work
+                const openWork = breakdowns.filter(r => {
+                    return !r.finishTime || r.finishTime === "-" || String(r.finishTime).trim() === "";
+                });
+                renderPendingTab(openWork, list);
             }
+        }
 
-            const pending = breakdowns.filter(r => !r.sevenMean);
-
-            if (pending.length === 0) {
-                list.innerHTML = `
-                    <div class="no-data">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="#333"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                        <p style="font-size: 18px; margin-top: 20px;">ไม่มีรายการค้างปิดรหัส 7 mean</p>
-                        <a href="dashboard.html" style="color: #007BFF; text-decoration: none;">ไปที่ Dashboard</a>
-                    </div>
-                `;
+        function renderSevenMeanTab(records, container) {
+            if (records.length === 0) {
+                container.innerHTML = `<div class="no-data"><p>ไม่มีรายการค้างปิดรหัส 7 mean</p></div>`;
                 return;
             }
 
-            list.innerHTML = pending.map(record => `
+            container.innerHTML = records.map(record => `
                 <div class="record-card" id="card-${record.id}">
-                    <div class="problem-section">
-                        <label>อาการเสีย (Problem)</label>
-                        <p class="problem-text">${record.problem}</p>
-                    </div>
-
+                    <div class="problem-section"><label>อาการเสีย (Problem)</label><p class="problem-text">${record.problem}</p></div>
                     <div class="card-grid">
-                        <div class="card-item">
-                            <label>วันที่ / เวลา</label>
-                            <span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span>
-                        </div>
-                        <div class="card-item">
-                            <label>ไลน์ผลิต</label>
-                            <span>${record.line}</span>
-                        </div>
-                        <div class="card-item">
-                            <label>เครื่องจักร</label>
-                            <span>${record.machineId}</span>
-                        </div>
+                        <div class="card-item"><label>วันที่ / เวลา</label><span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span>${record.line}</span></div>
+                        <div class="card-item"><label>เครื่องจักร</label><span>${record.machineId}</span></div>
                     </div>
-                    
                     <div class="input-group">
-                        <input type="text" id="input-${record.id}" placeholder="กรอกรหัส 7 mean ที่นี่..." autocomplete="off">
-                        <button onclick="updateSevenMean(${record.id}, this)">บันทึกรหัส</button>
+                        <input type="text" id="input-${record.id}" placeholder="กรอกรหัส 7 mean..." autocomplete="off">
+                        <button onclick="updateSevenMean(${record.id}, this)">บันทึก</button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function renderPendingTab(records, container) {
+            if (records.length === 0) {
+                container.innerHTML = `<div class="no-data"><p>ไม่มีรายการงานค้าง (ทุกอย่างปิดหมดแล้ว)</p></div>`;
+                return;
+            }
+
+            container.innerHTML = records.map(record => `
+                <div class="record-card" id="card-${record.id}">
+                    <div class="problem-section"><label>อาการเสีย (Problem)</label><p class="problem-text">${record.problem}</p></div>
+                    <div class="card-grid">
+                        <div class="card-item"><label>วันที่แจ้ง</label><span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span>${record.line}</span></div>
+                        <div class="card-item"><label>เครื่องจักร</label><span>${record.machineId}</span></div>
+                    </div>
+                    
+                    <div class="closing-form">
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>เวลาซ่อมเสร็จ:</label>
+                                <input type="text" id="finish-${record.id}" placeholder="-- : --" maxlength="5">
+                            </div>
+                            <div class="form-field">
+                                <label>รหัส 7 mean:</label>
+                                <input type="text" id="seven-${record.id}" placeholder="รหัส 7 mean">
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label>วิธีแก้ไข:</label>
+                            <textarea id="sol-${record.id}" rows="2" placeholder="ระบุวิธีแก้ไข..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>ชื่ออะไหล่:</label>
+                                <input type="text" id="partName-${record.id}" placeholder="ชื่ออะไหล่">
+                            </div>
+                            <div class="form-field">
+                                <label>รุ่น / โมเดล:</label>
+                                <input type="text" id="partModel-${record.id}" placeholder="รุ่น / โมเดล">
+                            </div>
+                        </div>
+                        <button class="btn-submit-close" onclick="closePendingWork(${record.id}, this)">ปิดงาน (Finish Job)</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Setup time inputs
+            records.forEach(r => setupTimeInput(`finish-${r.id}`));
+        }
+
+        function setupTimeInput(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', function(e) {
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length > 2) val = val.slice(0, 2) + ":" + val.slice(2, 4);
+                e.target.value = val;
+            });
+        }
+
+        async function closePendingWork(id, btn) {
+            const finishTime = document.getElementById(`finish-${id}`).value;
+            const solution = document.getElementById(`sol-${id}`).value.trim();
+            const sevenMean = document.getElementById(`seven-${id}`).value.trim();
+            const partName = document.getElementById(`partName-${id}`).value.trim();
+            const partModel = document.getElementById(`partModel-${id}`).value.trim();
+
+            if (!finishTime || !solution) {
+                alert("กรุณากรอกเวลาซ่อมเสร็จและวิธีแก้ไข");
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> กำลังบันทึก...';
+
+            const sparePart = partModel ? `${partName} (${partModel})` : partName;
+
+            try {
+                // We'll calculate duration locally if possible
+                let duration = "-";
+                let breakdowns = JSON.parse(localStorage.getItem("breakdowns")) || [];
+                const record = breakdowns.find(r => r.id === id);
+                if (record && record.time && finishTime) {
+                    const [h1, m1] = record.time.split(':').map(Number);
+                    const [h2, m2] = finishTime.split(':').map(Number);
+                    let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+                    if (diff < 0) diff += 1440;
+                    duration = `${diff} นาที`;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append('action', 'update');
+                formData.append('rowIndex', id);
+                formData.append('finishTime', finishTime);
+                formData.append('solution', solution);
+                formData.append('sevenMean', sevenMean);
+                formData.append('sparePart', sparePart);
+                formData.append('duration', duration);
+
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                const index = breakdowns.findIndex(r => r.id === id);
+                if (index !== -1) {
+                    breakdowns[index].finishTime = finishTime;
+                    breakdowns[index].solution = solution;
+                    breakdowns[index].sevenMean = sevenMean;
+                    breakdowns[index].sparePart = sparePart;
+                    breakdowns[index].duration = duration;
+                    localStorage.setItem("breakdowns", JSON.stringify(breakdowns));
+                    
+                    const card = document.getElementById(`card-${id}`);
+                    card.style.borderLeftColor = '#4ade80';
+                    card.innerHTML = `<h3 class="success-animation" style="text-align: center; padding: 40px;">ปิดงานสำเร็จแล้ว!</h3>`;
+                    setTimeout(() => loadRecords(), 1000);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาด");
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
         }
 
         async function updateSevenMean(id, btn) {
@@ -327,13 +569,11 @@
                 return;
             }
 
-            // Show loading state
             const originalText = btn.innerText;
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> กำลังบันทึก...';
+            btn.innerHTML = '<span class="loading-spinner"></span>';
             
             try {
-                // 1. Update Google Sheets
                 const formData = new URLSearchParams();
                 formData.append('action', 'update');
                 formData.append('rowIndex', id);
@@ -346,32 +586,26 @@
                     body: formData.toString()
                 });
 
-                // 2. Update Local Storage
                 let breakdowns = JSON.parse(localStorage.getItem("breakdowns")) || [];
                 const index = breakdowns.findIndex(r => r.id === id);
                 
                 if (index !== -1) {
                     breakdowns[index].sevenMean = val;
                     localStorage.setItem("breakdowns", JSON.stringify(breakdowns));
-                    
-                    // Animation and remove
                     const card = document.getElementById(`card-${id}`);
                     card.style.borderLeftColor = '#4ade80';
                     card.innerHTML = `<h3 class="success-animation" style="text-align: center; padding: 40px;">บันทึกรหัสเรียบร้อยแล้ว!</h3>`;
-                    
-                    setTimeout(() => {
-                        loadPendingRecords();
-                    }, 1000);
+                    setTimeout(() => loadRecords(), 1000);
                 }
             } catch (err) {
-                console.error("Update Error:", err);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheet กรุณาลองใหม่อีกครั้ง");
+                console.error(err);
+                alert("เกิดข้อผิดพลาด");
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         }
 
-        window.onload = loadPendingRecords;
+        window.onload = loadRecords;
     </script>
 </body>
 </html>
