@@ -815,15 +815,30 @@
 
         @media (max-width: 768px) {
             .compare-container {
-                grid-template-columns: 1fr 1fr; /* Keep side-by-side */
-                gap: 15px;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 10px;
+                width: 100%;
             }
             .compare-container::after { display: block; left: 50%; }
             
-            .compare-machine-name { font-size: 13px !important; }
-            .compare-machine-count { font-size: 16px !important; }
+            .compare-machine-name { 
+                font-size: 12px !important;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 60px;
+            }
+            .compare-machine-count { font-size: 14px !important; }
             .rank-badge { font-size: 8px !important; }
-            .compare-header h2 { font-size: 20px !important; }
+            .compare-header h2 { font-size: 18px !important; }
+            
+            .compare-machine-card {
+                padding: 10px 5px !important;
+            }
+
+            .machine-problem-snippet {
+                display: none;
+            }
             
             .filter-row {
                 flex-wrap: nowrap !important;
@@ -984,6 +999,7 @@
             backdrop-filter: blur(20px);
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             margin-top: 10px;
+            overflow: hidden; /* Prevent horizontal scroll */
         }
 
         @media (max-width: 768px) {
