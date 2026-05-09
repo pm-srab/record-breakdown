@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ปิดรหัส 7 mean - Maintenance Records</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            min-height: 100vh;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            width: 90%;
+            max-width: 800px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #007BFF;
+            letter-spacing: 1px;
+        }
+
+        .btn-back {
+            background-color: transparent;
+            border: 2px solid #444;
+            color: #999;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: #fff;
+            border-color: #007BFF;
+        }
+
+        .record-card {
+            background-color: #1f3050;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-left: 5px solid #007BFF;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns on mobile */
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: 1fr; /* 1 column on very small phones */
+            }
+        }
+
+        .card-item label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .card-item span {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background-color: #0d1a33;
+            border: 1px solid #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .input-group button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 100px;
+            color: #555;
+        }
+
+        .success-animation {
+            color: #4ade80;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .problem-section {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .problem-section label {
+            display: block;
+            font-size: 13px;
+            color: #ffcc00;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .problem-text {
+            margin: 0;
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <h1>รายการรอปิดรหัส 7 mean</h1>
+            <a href="Index.html" class="btn-back">กลับหน้าหลัก</a>
+        </div>
+
+        <div id="recordsList">
+            <!-- Records will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+
+        function formatDMY(dateStr) {
+            if (!dateStr) return "-";
+            const str = String(dateStr).replace(/^'/, '');
+            
+            // 1. ISO YYYY-MM-DD
+            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) {
+                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+            }
+
+            // 2. Strict DD/MM/YYYY (handles our new save format)
+            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (strictDmyMatch) {
+                return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}`;
+            }
+            
+            // 3. Try Date object (handles legacy M/D/Y data without leading zeros)
+            try {
+                const d = new Date(dateStr);
+                if (!isNaN(d.getTime())) {
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    return `${day}/${month}/${year}`;
+                }
+            } catch (e) {}
+
+            // 3. Fallback explicitly to D/M/Y if Date parsing failed (e.g. 30/12/2026)
+            const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+            if (dmyMatch) {
+                let d = dmyMatch[1].padStart(2, '0');
+                let m = dmyMatch[2].padStart(2, '0');
+                let y = dmyMatch[3];
+                if (y.length === 2) y = "20" + y;
+                return `${d}/${m}/${y}`;
+            }
+
+            return dateStr;
+        }
+
+        function formatTimeOnly(timeStr) {
+            if (!timeStr) return "-";
+            const str = String(timeStr);
+            
+            // If it's a full ISO string or contains date info, use Date object for local time
+            if (str.includes('T') || str.includes('-')) {
+                try {
+                    const d = new Date(str);
+                    if (!isNaN(d.getTime())) {
+                        const hours = String(d.getHours()).padStart(2, '0');
+                        const minutes = String(d.getMinutes()).padStart(2, '0');
+                        return `${hours}:${minutes}`;
+                    }
+                } catch (e) {}
+            }
+            
+            // Fallback to simple regex for HH:mm
+            const simpleTimeMatch = str.match(/^(\d{1,2}:\d{2})/);
+            if (simpleTimeMatch) return simpleTimeMatch[1];
+            
+            return timeStr;
+        }
+
+        function loadPendingRecords() {
+            const list = document.getElementById('recordsList');
+            let breakdowns = [];
+            
+            try {
+                const data = localStorage.getItem("breakdowns");
+                if (data) {
+                    breakdowns = JSON.parse(data);
+                }
+            } catch (err) {
+                console.error("Error loading records:", err);
+            }
+
+            const pending = breakdowns.filter(r => !r.sevenMean);
+
+            if (pending.length === 0) {
+                list.innerHTML = `
+                    <div class="no-data">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="#333"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        <p style="font-size: 18px; margin-top: 20px;">ไม่มีรายการค้างปิดรหัส 7 mean</p>
+                        <a href="dashboard.html" style="color: #007BFF; text-decoration: none;">ไปที่ Dashboard</a>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = pending.map(record => `
+                <div class="record-card" id="card-${record.id}">
+                    <div class="problem-section">
+                        <label>อาการเสีย (Problem)</label>
+                        <p class="problem-text">${record.problem}</p>
+                    </div>
+
+                    <div class="card-grid">
+                        <div class="card-item">
+                            <label>วันที่ / เวลา</label>
+                            <span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span>
+                        </div>
+                        <div class="card-item">
+                            <label>ไลน์ผลิต</label>
+                            <span>${record.line}</span>
+                        </div>
+                        <div class="card-item">
+                            <label>เครื่องจักร</label>
+                            <span>${record.machineId}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="input-${record.id}" placeholder="กรอกรหัส 7 mean ที่นี่..." autocomplete="off">
+                        <button onclick="updateSevenMean(${record.id}, this)">บันทึกรหัส</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateSevenMean(id, btn) {
+            const input = document.getElementById(`input-${id}`);
+            const val = input.value.trim();
+            
+            if (!val) {
+                alert("กรุณากรอกรหัส 7 mean");
+                input.focus();
+                return;
+            }
+
+            // Show loading state
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> กำลังบันทึก...';
+            
+            try {
+                // 1. Update Google Sheets
+                const formData = new URLSearchParams();
+                formData.append('action', 'update');
+                formData.append('rowIndex', id);
+                formData.append('sevenMean', val);
+
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                // 2. Update Local Storage
+                let breakdowns = JSON.parse(localStorage.getItem("breakdowns")) || [];
+                const index = breakdowns.findIndex(r => r.id === id);
+                
+                if (index !== -1) {
+                    breakdowns[index].sevenMean = val;
+                    localStorage.setItem("breakdowns", JSON.stringify(breakdowns));
+                    
+                    // Animation and remove
+                    const card = document.getElementById(`card-${id}`);
+                    card.style.borderLeftColor = '#4ade80';
+                    card.innerHTML = `<h3 class="success-animation" style="text-align: center; padding: 40px;">บันทึกรหัสเรียบร้อยแล้ว!</h3>`;
+                    
+                    setTimeout(() => {
+                        loadPendingRecords();
+                    }, 1000);
+                }
+            } catch (err) {
+                console.error("Update Error:", err);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheet กรุณาลองใหม่อีกครั้ง");
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        window.onload = loadPendingRecords;
+    </script>
+</body>
+</html>

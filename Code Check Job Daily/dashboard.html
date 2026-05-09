@@ -1,0 +1,2363 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Maintenance Records</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+            overscroll-behavior-y: none; /* Prevent bounce */
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: #242424;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            border-right: 1px solid #2c3e50;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            margin-left: -260px;
+        }
+
+        .sidebar-header {
+            padding: 0 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #007BFF;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #bdc3c7;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .nav-item.active {
+            background-color: rgba(0, 123, 255, 0.2);
+            color: #007BFF;
+            border-left-color: #007BFF;
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .nav-item:hover .nav-icon,
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px;
+        }
+
+        .btn-back-sidebar {
+            display: block;
+            padding: 12px;
+            text-align: center;
+            background-color: transparent;
+            border: 1px solid #007BFF;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .btn-back-sidebar:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0d0d0d 100%);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #ffffff;
+        }
+
+        .menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #242424;
+            border: 1px solid #2c3e50;
+            border-radius: 8px;
+            color: #ffffff;
+            cursor: pointer;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background-color: #007BFF;
+            border-color: #007BFF;
+        }
+
+        .btn-back-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #242424;
+            border: 1px solid #2c3e50;
+            border-radius: 8px;
+            color: #bdc3c7;
+            cursor: pointer;
+            margin-right: 15px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back-header:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-color: #444;
+        }
+
+        .btn-nav-home {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid #007BFF;
+            padding: 10px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-nav-home:hover {
+            background-color: #007BFF;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            html, body {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                height: auto !important;
+                min-height: 100vh;
+                display: block !important; /* Back to block for simplest mobile layout */
+            }
+            .sidebar {
+                position: fixed;
+                height: 100%;
+                width: 260px;
+                left: 0;
+                top: 0;
+                margin-left: -260px;
+                z-index: 2001;
+                transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .sidebar.active {
+                margin-left: 0 !important;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 15px 15px 80px 15px !important;
+                box-sizing: border-box !important;
+            }
+            .header {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                width: 100%;
+                position: relative;
+                padding-right: 100px; /* Make room for back button */
+            }
+            .btn-nav-home {
+                position: absolute !important;
+                top: 0;
+                right: 0;
+                margin: 0 !important;
+                padding: 8px 15px !important;
+                font-size: 12px !important;
+                z-index: 2002;
+            }
+            h1 {
+                font-size: 18px !important;
+                width: 100%;
+            }
+            .stats-container, .charts-container, .tab-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .chart-card {
+                height: auto !important;
+                width: 100% !important;
+                margin-bottom: 25px !important;
+                padding: 20px 15px !important;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 2000;
+                backdrop-filter: blur(4px);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .btn-close-sidebar {
+                display: block;
+                background: none;
+                border: none;
+                color: #888;
+                cursor: pointer;
+                padding: 5px;
+            }
+        }
+
+        /* Table Styles (Existing) */
+        .record-table-container {
+            background-color: #1f3050;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #2c3e50;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #162447;
+            color: #bbbbbb;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .col-problem, .col-solution {
+            max-width: 200px;
+            word-wrap: break-word;
+            white-space: normal;
+            color: #bdc3c7;
+        }
+
+        .badge-time {
+            background: linear-gradient(135deg, #007BFF, #00d4ff);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px;
+            color: #555;
+            font-style: italic;
+        }
+
+        .btn-clear {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .btn-clear:hover {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 15px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 123, 255, 0.05);
+            border-color: rgba(0, 123, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #007BFF;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 123, 255, 0.1);
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            color: #007BFF;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 123, 255, 0.3);
+        }
+
+        .chart-card canvas {
+            max-height: 300px;
+        }
+
+        .chart-card h3 {
+            margin-top: 0;
+            color: #bdc3c7;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px;
+            }
+            .chart-card {
+                padding: 15px;
+                height: 320px !important; /* Strict fixed height */
+                min-height: 320px;
+            }
+            .stat-card {
+                padding: 15px 10px;
+            }
+            .stat-value {
+                font-size: 24px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+
+        /* Machine Group Toggle */
+        .group-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 40px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .group-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .group-btn:hover {
+            color: #fff;
+        }
+
+        .group-btn.active {
+            background-color: #007BFF;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+        }
+
+        .group-btn.press.active {
+            background-color: #28a745;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .group-btn.robot.active {
+            background-color: #a29bfe;
+            box-shadow: 0 4px 12px rgba(162, 155, 254, 0.4);
+        }
+
+        /* Compact Toggles in Cards */
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .card-header-flex h3 {
+            margin: 0 !important;
+            text-align: left !important;
+            font-size: 15px !important;
+        }
+
+        .compact-toggle {
+            margin: 0 !important;
+            padding: 4px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .compact-toggle .group-btn {
+            padding: 6px 14px;
+            font-size: 10px;
+            border-radius: 15px;
+            gap: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .card-header-flex {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+
+        .placeholder-card p {
+            color: #bdc3c7;
+        }
+
+        :root {
+            --pareto-height: 320px;
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --pareto-height: 480px; /* Even more space for long labels */
+            }
+        }
+        /* Math Modal */
+        .math-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            z-index: 2000;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: white;
+        }
+        .math-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+        .math-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .math-formula {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 13px;
+            color: #4cd137;
+        }
+        .math-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1999;
+        }
+
+        /* Data Page & Control Center Styles */
+        .control-center {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn {
+            padding: 10px 30px;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn.active {
+            background: #007BFF;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .filter-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .month-select {
+            background: #242424;
+            color: white;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        @media (max-width: 992px) {
+            .frequency-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .frequency-col {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .col-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .col-header h3 {
+            margin: 0;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.high { background-color: #ff4757; box-shadow: 0 0 10px #ff4757; }
+        .dot.med { background-color: #ffa502; box-shadow: 0 0 10px #ffa502; }
+        .dot.low { background-color: #2ed573; box-shadow: 0 0 10px #2ed573; }
+
+        .machine-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .machine-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .machine-item:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .machine-name {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .break-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Apple Compare Style */
+        .compare-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            position: relative;
+        }
+
+        .compare-container::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100px;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .compare-container {
+                grid-template-columns: 1fr 1fr; /* Keep side-by-side */
+                gap: 15px;
+            }
+            .compare-container::after { display: block; left: 50%; }
+            
+            .compare-machine-name { font-size: 13px !important; }
+            .compare-machine-count { font-size: 16px !important; }
+            .rank-badge { font-size: 8px !important; }
+            .compare-header h2 { font-size: 20px !important; }
+            
+            .filter-row {
+                flex-wrap: nowrap !important;
+                gap: 8px !important;
+            }
+            .month-select {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+            }
+        }
+
+        .compare-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .compare-header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .compare-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .compare-machine-card {
+            width: 100%;
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .compare-machine-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .compare-machine-count {
+            font-size: 24px;
+            font-weight: 800;
+            color: #007BFF;
+        }
+
+        .machine-problem-snippet {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .rank-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Detail Modal */
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 450px;
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            z-index: 3000;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            color: white;
+            animation: modalPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .detail-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .detail-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #007BFF;
+        }
+
+        .detail-header p {
+            color: #666;
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        .problem-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .problem-breakdown::-webkit-scrollbar {
+            width: 4px;
+        }
+        .problem-breakdown::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        .problem-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .problem-text {
+            font-size: 13px;
+            color: #bdc3c7;
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .problem-count {
+            font-weight: 700;
+            color: #fff;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .data-portal-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .data-portal-card {
+                padding: 15px;
+                border-radius: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>SRAB Dashboard</h2>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        
+        <div class="nav-item active" onclick="switchTab('overall', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Overall
+        </div>
+
+        <div class="nav-item" onclick="switchTab('analysis', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            Analysis
+        </div>
+
+        <div class="nav-item" onclick="switchTab('result', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            Result
+        </div>
+        <div class="nav-item" onclick="switchTab('graph', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            <span>Data Center</span>
+        </div>
+        <div class="sidebar-footer">
+            <button onclick="forceReset()" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; color: #e74c3c; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s;">ล้างแคชและซิงค์ใหม่</button>
+            <a href="Index.html" class="btn-back-sidebar">กลับหน้าหลัก</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Overall Section -->
+        <div id="overall" class="content-section active">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </button>
+                    <h1>Maintenance History (Overall)</h1>
+                </div>
+                <a href="Index.html" class="btn-nav-home">กลับหน้าหลัก</a>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <span class="stat-value" id="totalRecords">0</span>
+                    <span class="stat-label">เรื่องทั้งหมด</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </div>
+                    <span class="stat-value" id="totalMachines">0</span>
+                    <span class="stat-label">เครื่องที่เสีย</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #ffcc00; background: rgba(255, 204, 0, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </div>
+                    <span class="stat-value" id="dayShift">0</span>
+                    <span class="stat-label">Day Shift</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #a29bfe; background: rgba(162, 155, 254, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <span class="stat-value" id="nightShift">0</span>
+                    <span class="stat-label">Night Shift</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: #ff4757; background: rgba(255, 71, 87, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <span class="stat-value" id="repeatJobs">0</span>
+                    <span class="stat-label">เสียซ้ำ</span>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>จำนวนเครื่องที่เสีย (รายวัน)</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="dailyBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>ประเภทเครื่องจักรที่เสีย</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="machinePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Section -->
+        <div id="analysis" class="content-section">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </button>
+                    <h1>Analysis</h1>
+                </div>
+                <a href="Index.html" class="btn-nav-home">กลับหน้าหลัก</a>
+            </div>
+            <div class="charts-container" style="grid-template-columns: 1fr;">
+                <div class="chart-card">
+                    <h3>Root Cause Analysis: Top 10 Problems M/C</h3>
+                    <div style="position: relative; height: var(--pareto-height, 320px); width: 100%;">
+                        <canvas id="paretoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="card-header-flex">
+                        <h3>Mean Time To Repair (MTTR)</h3>
+                        <div class="group-toggle-container compact-toggle" id="mttrToggle">
+                            <button class="group-btn press active" onclick="switchMttrGroup('Press', this)">Press</button>
+                            <button class="group-btn robot" onclick="switchMttrGroup('Robot', this)">Robot</button>
+                        </div>
+                    </div>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="mttrChart"></canvas>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <button onclick="showMath('MTTR')" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">รายละเอียดการคำนวณ</button>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header-flex">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <h3 style="margin: 0;">Mean Time Between Failures (MTBF)</h3>
+                        </div>
+                        <div class="group-toggle-container compact-toggle" id="mtbfToggle">
+                            <button class="group-btn press active" onclick="switchMtbfGroup('Press', this)">Press</button>
+                            <button class="group-btn robot" onclick="switchMtbfGroup('Robot', this)">Robot</button>
+                        </div>
+                    </div>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="mtbfChart"></canvas>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <button onclick="showMath('MTBF')" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">รายละเอียดการคำนวณ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result" class="content-section">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </button>
+                    <h1>Result (Maintenance History)</h1>
+                </div>
+                <a href="Index.html" class="btn-nav-home">กลับหน้าหลัก</a>
+            </div>
+
+            <div class="record-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>ไลน์</th>
+                            <th>เครื่องจักร</th>
+                            <th>เวลาแจ้ง</th>
+                            <th>เวลาเสร็จ</th>
+                            <th>รวมเวลา</th>
+                            <th>หน่วยงาน</th>
+                            <th>อาการ</th>
+                            <th>วิธีแก้ไข</th>
+                            <th>อะไหล่</th>
+                            <th>รหัส 7 mean</th>
+                            <th style="width: 50px; text-align: center;">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <!-- Data inserted by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Data Page Section -->
+        <div id="graph" class="content-section">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </button>
+                    <h1>Data Center</h1>
+                </div>
+                <a href="Index.html" class="btn-nav-home">กลับหน้าหลัก</a>
+            </div>
+
+            <div class="control-center">
+                <button class="control-btn active" onclick="switchDataView('data', this)">Machine Data</button>
+                <button class="control-btn" onclick="switchDataView('compare', this)">Compare Months</button>
+            </div>
+
+            <div class="data-portal-card">
+                <!-- View: Data -->
+                <div id="view-data" class="view-section active">
+                    <div class="filter-row">
+                        <span style="color: #888;">เดือนที่เลือก:</span>
+                        <select id="dataMonthSelect" class="month-select" onchange="updateDataView()">
+                            <!-- Options generated by JS -->
+                        </select>
+                    </div>
+                    
+                    <div class="frequency-grid">
+                        <div class="frequency-col">
+                            <div class="col-header">
+                                <div class="dot high"></div>
+                                <h3 style="color: #ff4757;">High Risk (>5)</h3>
+                            </div>
+                            <div id="highRiskList" class="machine-list">
+                                <!-- Data -->
+                            </div>
+                        </div>
+                        <div class="frequency-col">
+                            <div class="col-header">
+                                <div class="dot med"></div>
+                                <h3 style="color: #ffa502;">Medium Risk (2-4)</h3>
+                            </div>
+                            <div id="medRiskList" class="machine-list">
+                                <!-- Data -->
+                            </div>
+                        </div>
+                        <div class="frequency-col">
+                            <div class="col-header">
+                                <div class="dot low"></div>
+                                <h3 style="color: #2ed573;">Low Risk (0-1)</h3>
+                            </div>
+                            <div id="lowRiskList" class="machine-list">
+                                <!-- Data -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View: Compare -->
+                <div id="view-compare" class="view-section">
+                    <div class="filter-row">
+                        <select id="compareMonth1" class="month-select" onchange="updateCompareView()"></select>
+                        <span style="font-size: 20px; font-weight: 700; color: #444;">VS</span>
+                        <select id="compareMonth2" class="month-select" onchange="updateCompareView()"></select>
+                    </div>
+
+                    <div class="compare-container">
+                        <div class="compare-column">
+                            <div id="compareList1" style="width: 100%;">
+                                <!-- Top 10 machines -->
+                            </div>
+                        </div>
+                        <div class="compare-column">
+                            <div id="compareList2" style="width: 100%;">
+                                <!-- Top 10 machines -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Section -->
+        <div id="pending" class="content-section">
+            <div class="header">
+                <div style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </button>
+                    <h1>งานคงค้าง (Pending)</h1>
+                </div>
+                <a href="Index.html" class="btn-nav-home">กลับหน้าหลัก</a>
+            </div>
+            <div class="placeholder-card">
+                <h2>Pending Jobs</h2>
+                <p>รายการงานที่ยังซ่อมไม่เสร็จ หรือรออะไหล่ (อยู่ระหว่างการพัฒนา)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('active');
+            sidebar.classList.toggle('collapsed');
+            overlay.classList.toggle('active');
+        }
+
+        function switchTab(tabId, el) {
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+
+            // Update sections
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // Load data if switching to result
+            if (tabId === 'result') {
+                loadRecords();
+            }
+            // Initialize Data Center if switching to graph (now Data Center)
+            if (tabId === 'graph') {
+                initDataCenter();
+            }
+        }
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+
+        function formatDMY(dateStr) {
+            if (!dateStr) return "-";
+            const str = String(dateStr).replace(/^'/, '');
+            
+            // 1. ISO YYYY-MM-DD
+            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) {
+                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+            }
+
+            // 2. Strict DD/MM/YYYY (handles our new save format)
+            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (strictDmyMatch) {
+                return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}`;
+            }
+            
+            // 3. Try Date object (handles legacy M/D/Y data without leading zeros)
+            try {
+                const d = new Date(dateStr);
+                if (!isNaN(d.getTime())) {
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    return `${day}/${month}/${year}`;
+                }
+            } catch (e) {}
+
+            // 3. Fallback explicitly to D/M/Y if Date parsing failed (e.g. 30/12/2026)
+            const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+            if (dmyMatch) {
+                let d = dmyMatch[1].padStart(2, '0');
+                let m = dmyMatch[2].padStart(2, '0');
+                let y = dmyMatch[3];
+                if (y.length === 2) y = "20" + y;
+                return `${d}/${m}/${y}`;
+            }
+
+            return dateStr;
+        }
+
+        function formatTimeOnly(timeStr) {
+            if (!timeStr) return "-";
+            const str = String(timeStr);
+            
+            // If it's a full ISO string or contains date info, use Date object for local time
+            if (str.includes('T') || str.includes('-')) {
+                try {
+                    const d = new Date(str);
+                    if (!isNaN(d.getTime())) {
+                        const hours = String(d.getHours()).padStart(2, '0');
+                        const minutes = String(d.getMinutes()).padStart(2, '0');
+                        return `${hours}:${minutes}`;
+                    }
+                } catch (e) {}
+            }
+            
+            // Fallback to simple regex for HH:mm
+            const simpleTimeMatch = str.match(/^(\d{1,2}:\d{2})/);
+            if (simpleTimeMatch) return simpleTimeMatch[1];
+            
+            return timeStr;
+        }
+
+        async function loadRecords() {
+            const body = document.getElementById('recordsBody');
+            let breakdowns = [];
+
+            // 1. Load from localStorage immediately so the user sees their data right away
+            const localData = localStorage.getItem("breakdowns");
+            if (localData) {
+                breakdowns = JSON.parse(localData);
+                updateStats(breakdowns);
+                renderCharts(breakdowns);
+                displayRecords(breakdowns);
+            } else {
+                body.innerHTML = '<tr><td colspan="12" class="no-data">กำลังโหลดข้อมูล...</td></tr>';
+            }
+            
+            try {
+                // 2. Try to fetch from Google Sheets in the background
+                const response = await fetch(SCRIPT_URL);
+                const googleData = await response.json();
+                
+                if (googleData && Array.isArray(googleData)) {
+                    // Filter out empty rows
+                    const validRows = googleData.filter(row => row[0] && row[2]);
+                    
+                    const cloudBreakdowns = validRows.map((row, index) => ({
+                        date: row[0],
+                        line: row[1],
+                        machineId: row[2],
+                        caseCount: 1,
+                        time: row[3],
+                        finishTime: row[4],
+                        duration: row[5],
+                        department: row[6],
+                        problem: row[7],
+                        solution: row[8],
+                        sparePart: row[9],
+                        sevenMean: row[10],
+                        id: index
+                    }));
+                    
+                    localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
+                    
+                    try {
+                        updateStats(cloudBreakdowns);
+                        renderCharts(cloudBreakdowns);
+                        displayRecords(cloudBreakdowns);
+                    } catch (renderError) {
+                        console.error("UI Rendering Error:", renderError);
+                    }
+                }
+            } catch (err) {
+                console.error("Cloud Sync Error:", err);
+            }
+        }
+
+        function forceReset() {
+            if (confirm("ต้องการล้างข้อมูลเก่าและซิงค์ใหม่จาก Cloud หรือไม่?")) {
+                localStorage.removeItem("breakdowns");
+                location.reload();
+            }
+        }
+
+        function displayRecords(breakdowns) {
+            const body = document.getElementById('recordsBody');
+            if (!breakdowns || breakdowns.length === 0) {
+                body.innerHTML = '<tr><td colspan="12" class="no-data">ไม่มีข้อมูลบันทึก</td></tr>';
+                return;
+            }
+
+            breakdowns.sort((a, b) => b.id - a.id);
+            body.innerHTML = breakdowns.map(record => {
+                // Calculate duration in minutes for display
+                let durationMinutes = record.duration || "-";
+                
+                // Recalculate from start/end times for maximum accuracy
+                if (record.time && record.finishTime) {
+                    const [h1, m1] = String(record.time).split(':').map(Number);
+                    const [h2, m2] = String(record.finishTime).split(':').map(Number);
+                    if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
+                        let startMin = h1 * 60 + m1;
+                        let endMin = h2 * 60 + m2;
+                        if (endMin < startMin) endMin += 1440;
+                        durationMinutes = (endMin - startMin) + " นาที";
+                    }
+                } 
+                // Fallback: If no times but we have a Thai duration string, parse it
+                else if (typeof durationMinutes === 'string' && (durationMinutes.includes('ชม.') || durationMinutes.includes('นาที'))) {
+                    const hrMatch = durationMinutes.match(/(\d+)\s*ชม/);
+                    const minMatch = durationMinutes.match(/(\d+)\s*นาที/);
+                    const hrs = hrMatch ? parseInt(hrMatch[1]) : 0;
+                    const mins = minMatch ? parseInt(minMatch[1]) : 0;
+                    durationMinutes = (hrs * 60 + mins) + " นาที";
+                }
+
+                return `
+                <tr>
+                    <td>${formatDMY(record.date)}</td>
+                    <td>${record.line}</td>
+                    <td><strong>${record.machineId}</strong></td>
+                    <td>${formatTimeOnly(record.time)}</td>
+                    <td>${formatTimeOnly(record.finishTime)}</td>
+                    <td class="col-duration"><span class="badge-time">${durationMinutes}</span></td>
+                    <td>${record.department}</td>
+                    <td class="col-problem">${record.problem}</td>
+                    <td class="col-solution">${record.solution}</td>
+                    <td>${record.sparePart || '-'}</td>
+                    <td style="color: ${record.sevenMean ? '#ffffff' : '#ffcc00'}; font-weight: ${record.sevenMean ? 'normal' : 'bold'};">
+                        ${record.sevenMean || '⚠️ ยังไม่ได้กรอก'}
+                    </td>
+                    <td style="text-align: center;">
+                        <button onclick="deleteRecord(${record.id}, this)" style="background: none; border: none; cursor: pointer; color: #ff4d4d; padding: 5px; transition: 0.3s;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                        </button>
+                    </td>
+                </tr>
+            `;}).join('');
+        }
+
+        async function deleteRecord(id, btnElement) {
+            if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
+                
+                // Show loading state
+                const originalContent = btnElement.innerHTML;
+                btnElement.disabled = true;
+                btnElement.innerHTML = '<span class="loading-spinner" style="width: 14px; height: 14px; border-width: 2px; margin: 0; border-top-color: #ff4d4d;"></span>';
+                
+                try {
+                    // Send delete request to Google Sheets
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'delete');
+                    formData.append('rowIndex', id);
+
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData.toString()
+                    });
+
+                    // Remove from localStorage
+                    let breakdowns = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+                    breakdowns = breakdowns.filter(r => r.id !== id);
+                    localStorage.setItem("breakdowns", JSON.stringify(breakdowns));
+                    
+                    // Reload UI
+                    loadRecords();
+                } catch (error) {
+                    console.error("Delete Error:", error);
+                    alert("เกิดข้อผิดพลาดในการลบข้อมูลจาก Google Sheet");
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalContent;
+                }
+            }
+        }
+
+        function clearRecords() {
+            if (confirm("คุณต้องการล้างข้อมูลบันทึกทั้งหมดใช่หรือไม่?")) {
+                localStorage.removeItem("breakdowns");
+                loadRecords();
+            }
+        }
+
+        function updateStats(data) {
+            if (!data) return;
+
+            // Total Records
+            document.getElementById('totalRecords').textContent = data.length;
+
+            // Total Machines (Unique IDs)
+            const machines = new Set(data.map(r => r.machineId));
+            document.getElementById('totalMachines').textContent = machines.size;
+
+            // Shifts
+            let day = 0;
+            let night = 0;
+            data.forEach(r => {
+                if (r.time) {
+                    const timeStr = formatTimeOnly(r.time);
+                    const hour = parseInt(timeStr.split(':')[0]);
+                    // Day Shift: 08:00 - 20:00
+                    if (hour >= 8 && hour < 20) {
+                        day++;
+                    } else {
+                        night++;
+                    }
+                }
+            });
+            document.getElementById('dayShift').textContent = day;
+            document.getElementById('nightShift').textContent = night;
+
+            // Repeat Jobs (Machines with > 1 entry)
+            const counts = {};
+            data.forEach(r => counts[r.machineId] = (counts[r.machineId] || 0) + 1);
+            const repeats = Object.values(counts).filter(c => c > 1).length;
+            document.getElementById('repeatJobs').textContent = repeats;
+        }
+
+        let barChartInstance = null;
+        let pieChartInstance = null;
+        let paretoChartInstance = null;
+        let mttrChartInstance = null;
+        let mtbfChartInstance = null;
+        let currentMttrGroup = 'Press';
+        let currentMtbfGroup = 'Press';
+
+        function switchMttrGroup(group, el) {
+            currentMttrGroup = group;
+            const parent = document.getElementById('mttrToggle');
+            parent.querySelectorAll('.group-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            
+            const localData = localStorage.getItem("breakdowns");
+            if (localData) renderCharts(JSON.parse(localData), 'mttr');
+        }
+
+        function switchMtbfGroup(group, el) {
+            currentMtbfGroup = group;
+            const parent = document.getElementById('mtbfToggle');
+            parent.querySelectorAll('.group-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            
+            const localData = localStorage.getItem("breakdowns");
+            if (localData) renderCharts(JSON.parse(localData), 'mtbf');
+        }
+
+        function renderCharts(data, updateOnly = null) {
+            if (!data || data.length === 0) return;
+
+            // Helper to format date string to "DD/MM"
+            const formatShortDate = (dateStr) => {
+                const fullDate = formatDMY(dateStr);
+                if (fullDate === "-") return "-";
+                const parts = fullDate.split('/');
+                if (parts.length >= 2) {
+                    // Use D/M format (no leading zeros)
+                    return `${parseInt(parts[0])}/${parseInt(parts[1])}`;
+                }
+                return fullDate;
+            };
+
+            Chart.defaults.color = 'rgba(255,255,255,0.6)';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+            // --- 1. Bar Chart: Daily Failures ---
+            const dailyCounts = {};
+            const labels = [];
+            
+            // Sort data chronologically using our standardized format
+            const sortedData = [...data].sort((a, b) => {
+                const partsA = formatDMY(a.date).split('/');
+                const partsB = formatDMY(b.date).split('/');
+                if (partsA.length === 3 && partsB.length === 3) {
+                    const dateA = new Date(`${partsA[2]}-${partsA[1]}-${partsA[0]}`);
+                    const dateB = new Date(`${partsB[2]}-${partsB[1]}-${partsB[0]}`);
+                    return dateA - dateB;
+                }
+                return 0;
+            });
+
+            sortedData.forEach(r => {
+                if (r.date) {
+                    const shortDate = formatShortDate(r.date);
+                    if (!labels.includes(shortDate)) {
+                        labels.push(shortDate);
+                    }
+                    dailyCounts[shortDate] = (dailyCounts[shortDate] || 0) + 1;
+                }
+            });
+            
+            const barValues = labels.map(l => dailyCounts[l]);
+
+            const ctxBar = document.getElementById('dailyBarChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy();
+
+            const gradient = ctxBar.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(0, 123, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(0, 123, 255, 0.1)');
+            
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'จำนวนเครื่อง',
+                        data: barValues,
+                        backgroundColor: gradient,
+                        borderColor: '#007BFF',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    layout: {
+                        padding: { bottom: 20 }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { stepSize: 1, color: 'rgba(255,255,255,0.4)' },
+                            grid: { color: 'rgba(255,255,255,0.03)' }
+                        },
+                        x: {
+                            ticks: { 
+                                color: 'rgba(255,255,255,0.4)',
+                                autoSkip: true,
+                                maxRotation: 45,
+                                minRotation: 0,
+                                maxTicksLimit: 8
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // --- 2. Doughnut Chart: Machine Types ---
+            const machineCounts = {};
+            data.forEach(r => {
+                if (r.machineId) {
+                    machineCounts[r.machineId] = (machineCounts[r.machineId] || 0) + 1;
+                }
+            });
+
+            const pieLabels = Object.keys(machineCounts);
+            const pieData = Object.values(machineCounts);
+            
+            const colors = [
+                '#007BFF', '#6610f2', '#6f42c1', '#e83e8c', '#dc3545', 
+                '#fd7e14', '#ffc107', '#28a745', '#20c997', '#17a2b8'
+            ];
+
+            const ctxPie = document.getElementById('machinePieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+            
+            pieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: colors.map(c => c + 'CC'),
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    cutout: '70%',
+                    plugins: {
+                        legend: { 
+                            position: window.innerWidth < 768 ? 'bottom' : 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                color: 'rgba(255,255,255,0.7)',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- 3. Pareto Chart: Top 10 Problems ---
+            const problemCounts = {};
+            data.forEach(r => {
+                if (r.problem) {
+                    problemCounts[r.problem] = (problemCounts[r.problem] || 0) + 1;
+                }
+            });
+
+            // Sort problem counts descending, take top 10
+            const sortedProblems = Object.entries(problemCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const paretoLabels = sortedProblems.map(item => item[0] || 'Unknown');
+            const paretoFrequencies = sortedProblems.map(item => item[1]);
+
+            // Calculate cumulative percentage
+            const totalParetoFreq = paretoFrequencies.reduce((sum, val) => sum + val, 0);
+            let cumulativeSum = 0;
+            const cumulativePercents = paretoFrequencies.map(val => {
+                cumulativeSum += val;
+                return (cumulativeSum / totalParetoFreq) * 100;
+            });
+
+            // Determine bar colors based on 80% threshold (More vital = Red, Less vital = Blue)
+            const barColors = cumulativePercents.map(pct => pct <= 80 ? '#ff4757' : 'rgba(0, 123, 255, 0.7)');
+            const barBorderColors = cumulativePercents.map(pct => pct <= 80 ? '#ff4757' : '#007BFF');
+
+            const ctxPareto = document.getElementById('paretoChart').getContext('2d');
+            if (paretoChartInstance) paretoChartInstance.destroy();
+
+            paretoChartInstance = new Chart(ctxPareto, {
+                type: 'bar',
+                data: {
+                    labels: paretoLabels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Cumulative %',
+                            data: cumulativePercents,
+                            borderColor: '#ffcc00',
+                            backgroundColor: '#ffcc00',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: '#ffcc00',
+                            pointRadius: 4,
+                            order: 1 // Draw line on top
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Frequency',
+                            data: paretoFrequencies,
+                            backgroundColor: barColors,
+                            borderColor: barBorderColors,
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y',
+                            order: 2 // Draw bars below line
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: window.innerWidth < 768 ? 1.2 : 1.8,
+                    animation: { duration: 0 },
+                    layout: {
+                        padding: {
+                            bottom: window.innerWidth < 768 ? 80 : 10
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Frequency', color: 'rgba(255,255,255,0.7)' },
+                            beginAtZero: true,
+                            ticks: { color: 'rgba(255,255,255,0.4)', stepSize: 1 },
+                            grid: { color: 'rgba(255,255,255,0.03)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Cumulative %', color: 'rgba(255,255,255,0.7)' },
+                            min: 0,
+                            max: 100,
+                            ticks: { color: 'rgba(255,255,255,0.4)' },
+                            grid: { drawOnChartArea: false } // Only draw grid lines for one axis
+                        },
+                        x: {
+                            ticks: { 
+                                color: 'rgba(255,255,255,0.7)',
+                                font: { size: window.innerWidth < 768 ? 8 : 11 },
+                                maxRotation: window.innerWidth < 768 ? 90 : 45,
+                                minRotation: window.innerWidth < 768 ? 90 : 45,
+                                autoSkip: false
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            position: window.innerWidth < 768 ? 'bottom' : 'top',
+                            labels: { 
+                                color: 'rgba(255,255,255,0.7)',
+                                font: { size: window.innerWidth < 768 ? 10 : 12 }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.datasetIndex === 0) { // Line
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    } else { // Bar
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- MTTR & MTBF Calculation ---
+            const groupPrefixes = {
+                'Press': ['BP', 'SP', 'PT', 'DF'],
+                'Robot': ['RB']
+            };
+            const operationalMinsPerMonth = 15.8 * 22 * 60;
+            const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+            // Shared logic for calculating MTTR/MTBF for a specific group
+            const calculateStats = (targetGroup) => {
+                const prefixes = groupPrefixes[targetGroup];
+                const monthlyData = {};
+                
+                data.forEach(r => {
+                    const rawId = String(r.machineId || "");
+                    const machineIds = rawId.includes(',') ? rawId.split(',').map(s => s.trim()) : [rawId.trim()];
+                    
+                    // Filter machines that belong to this group
+                    const matchingMachines = machineIds.filter(mIdRaw => {
+                        const mId = mIdRaw.toUpperCase();
+                        return prefixes.some(p => mId.startsWith(p));
+                    });
+
+                    if (matchingMachines.length === 0) return;
+
+                    if (r.date) {
+                        const fullDate = formatDMY(r.date);
+                        if (fullDate !== "-") {
+                            const parts = fullDate.split('/');
+                            if (parts.length === 3) {
+                                const monthIdx = parseInt(parts[1]) - 1;
+                                const monthYear = `${monthNames[monthIdx]} ${parts[2]}`;
+                                if (!monthlyData[monthYear]) {
+                                    monthlyData[monthYear] = { 
+                                        totalDuration: 0, 
+                                        count: 0, 
+                                        machines: new Set(),
+                                        individualMachineData: {} 
+                                    };
+                                }
+
+                                let durationMinutes = 0;
+                                if (r.duration) {
+                                    const str = String(r.duration).toLowerCase().trim();
+                                    // Match hours: "1 ชม", "1 hr", "1 h"
+                                    const hrMatch = str.match(/(\d+(\.\d+)?)\s*(ชม|hr|h)/);
+                                    // Match minutes: "45 นาที", "45 min", "45 m"
+                                    const minMatch = str.match(/(\d+(\.\d+)?)\s*(นาที|min|m)/);
+                                    
+                                    if (hrMatch || minMatch) {
+                                        durationMinutes = ((hrMatch ? parseFloat(hrMatch[1]) : 0) * 60) + (minMatch ? parseFloat(minMatch[1]) : 0);
+                                    } else {
+                                        // Try parsing as plain number
+                                        const plainNum = parseFloat(str.replace(/,/g, ''));
+                                        if (!isNaN(plainNum)) durationMinutes = plainNum;
+                                    }
+                                }
+                                
+                                const caseCount = 1; // Each row is 1 case
+                                
+                                // Add to GROUP TOTALS only ONCE per row
+                                monthlyData[monthYear].totalDuration += durationMinutes;
+                                monthlyData[monthYear].count += caseCount;
+
+                                // Update INDIVIDUAL machine stats for each matching machine
+                                matchingMachines.forEach(mIdRaw => {
+                                    const mId = mIdRaw.toUpperCase();
+                                    monthlyData[monthYear].machines.add(mId);
+                                    if (!monthlyData[monthYear].individualMachineData[mId]) {
+                                        monthlyData[monthYear].individualMachineData[mId] = { duration: 0, cases: 0 };
+                                    }
+                                    monthlyData[monthYear].individualMachineData[mId].duration += durationMinutes;
+                                    monthlyData[monthYear].individualMachineData[mId].cases += caseCount;
+                                });
+                            }
+                        }
+                    }
+                });
+
+                const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+                    const [mA, yA] = a.split(' ');
+                    const [mB, yB] = b.split(' ');
+                    if (yA !== yB) return parseInt(yA) - parseInt(yB);
+                    return monthNames.indexOf(mA) - monthNames.indexOf(mB);
+                });
+
+                const totalMachineCount = targetGroup === 'Press' ? 78 : 157;
+                const mttr = sortedMonths.map(m => (monthlyData[m].totalDuration / monthlyData[m].count).toFixed(2));
+                
+                const mtbf = sortedMonths.map(m => {
+                    const monthInfo = monthlyData[m];
+                    const brokenMachines = monthInfo.individualMachineData;
+                    const brokenMachineIds = Object.keys(brokenMachines);
+                    
+                    let totalMtbfSum = 0;
+                    brokenMachineIds.forEach(id => {
+                        const stats = brokenMachines[id];
+                        // Individual machine MTBF (in minutes)
+                        const individualMtbf = (operationalMinsPerMonth - stats.duration) / stats.cases;
+                        totalMtbfSum += individualMtbf;
+                    });
+                    
+                    const nonBrokenCount = Math.max(0, totalMachineCount - brokenMachineIds.length);
+                    totalMtbfSum += (nonBrokenCount * operationalMinsPerMonth);
+                    
+                    window.lastMtbfSum = totalMtbfSum; 
+                    
+                    // Convert total average from Minutes to Hours
+                    const avgMtbfHours = (totalMtbfSum / totalMachineCount) / 60;
+                    return avgMtbfHours.toFixed(2);
+                });
+
+                // Capture details for the "View Math" feature
+                const allUniqueMachines = new Set();
+                Object.values(monthlyData).forEach(m => {
+                    Object.keys(m.individualMachineData).forEach(id => allUniqueMachines.add(id));
+                });
+                
+                const details = {
+                    targetGroup,
+                    totalDuration: Object.values(monthlyData).reduce((sum, m) => sum + m.totalDuration, 0),
+                    totalCases: Object.values(monthlyData).reduce((sum, m) => sum + m.count, 0),
+                    mttr: mttr[mttr.length - 1],
+                    mtbf: mtbf[mtbf.length - 1],
+                    uniqueBroken: allUniqueMachines.size,
+                    totalMachines: totalMachineCount,
+                    operationalMins: operationalMinsPerMonth,
+                    totalMtbfSum: window.lastMtbfSum
+                };
+
+                // Store based on which chart it belongs to
+                if (!window.calcHistory) window.calcHistory = {};
+                window.calcHistory[`${targetGroup}`] = details;
+
+                return { labels: sortedMonths, mttr, mtbf };
+            };
+
+            // Only update the parts that are needed
+            if (!updateOnly || updateOnly === 'mttr') {
+                const mttrRes = calculateStats(currentMttrGroup);
+                const ctxMttr = document.getElementById('mttrChart').getContext('2d');
+                if (mttrChartInstance) mttrChartInstance.destroy();
+                mttrChartInstance = new Chart(ctxMttr, {
+                    type: 'bar',
+                    plugins: [ChartDataLabels],
+                    data: {
+                        labels: mttrRes.labels,
+                        datasets: [{
+                            label: 'MTTR (นาที)',
+                            data: mttrRes.mttr,
+                            backgroundColor: currentMttrGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : 'rgba(40, 167, 69, 0.7)',
+                            borderColor: currentMttrGroup === 'Robot' ? '#a29bfe' : '#28a745',
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'นาที', color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false } }
+                        },
+                        plugins: { 
+                            legend: { labels: { color: 'rgba(255,255,255,0.7)' } },
+                            tooltip: { enabled: true, mode: 'index', intersect: false },
+                            datalabels: {
+                                anchor: 'center',
+                                align: 'center',
+                                color: '#fff',
+                                font: { weight: 'bold', size: 12 },
+                                formatter: (val) => val > 0 ? parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : ''
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (!updateOnly || updateOnly === 'mtbf') {
+                const mtbfRes = calculateStats(currentMtbfGroup);
+                const ctxMtbf = document.getElementById('mtbfChart').getContext('2d');
+                if (mtbfChartInstance) mtbfChartInstance.destroy();
+                mtbfChartInstance = new Chart(ctxMtbf, {
+                    type: 'bar',
+                    plugins: [ChartDataLabels],
+                    data: {
+                        labels: mtbfRes.labels,
+                        datasets: [{
+                            label: 'MTBF (ชม.)',
+                            data: mtbfRes.mtbf,
+                            backgroundColor: currentMtbfGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : 'rgba(40, 167, 69, 0.7)',
+                            borderColor: currentMtbfGroup === 'Robot' ? '#a29bfe' : '#28a745',
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'ชม.', color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false } }
+                        },
+                        plugins: { 
+                            legend: { labels: { color: 'rgba(255,255,255,0.7)' } },
+                            tooltip: { enabled: true, mode: 'index', intersect: false },
+                            datalabels: {
+                                anchor: 'center',
+                                align: 'center',
+                                color: '#fff',
+                                font: { weight: 'bold', size: 12 },
+                                formatter: (val) => val > 0 ? parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : ''
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function showMath(type) {
+            const group = type === 'MTTR' ? currentMttrGroup : currentMtbfGroup;
+            const details = window.calcHistory ? window.calcHistory[group] : null;
+            if (!details) return;
+
+            const modal = document.getElementById('mathModal');
+            const overlay = document.getElementById('mathOverlay');
+            const content = document.getElementById('mathContent');
+            const title = document.getElementById('mathTitle');
+
+            title.textContent = `รายละเอียดการคำนวณ ${type} (${details.targetGroup})`;
+
+            if (type === 'MTTR') {
+                content.innerHTML = `
+                    <div class="math-row"><span>รวมเวลา Downtime:</span> <span>${details.totalDuration.toLocaleString()} นาที</span></div>
+                    <div class="math-row"><span>จำนวนครั้งที่เสีย (Case):</span> <span>${details.totalCases.toLocaleString()} ครั้ง</span></div>
+                    <div class="math-formula">
+                        MTTR = รวมเวลา Downtime / จำนวน Case<br>
+                        MTTR = ${details.totalDuration.toLocaleString()} / ${details.totalCases.toLocaleString()}<br>
+                        MTTR = ${details.mttr} นาที
+                    </div>
+                `;
+            } else {
+                const perfectCount = details.totalMachines - details.uniqueBroken;
+                content.innerHTML = `
+                    <div class="math-row"><span>เวลาที่ต้องการทำงาน (ต่อเครื่อง):</span> <span>${details.operationalMins.toLocaleString()} นาที</span></div>
+                    <div class="math-row"><span>จำนวนเครื่องจักรทั้งหมด:</span> <span>${details.totalMachines} เครื่อง</span></div>
+                    <div class="math-row"><span>เครื่องที่เสียจริง:</span> <span>${details.uniqueBroken} เครื่อง</span></div>
+                    <div class="math-row"><span>เครื่องที่ไม่เสียเลย (Perfect):</span> <span>${perfectCount} เครื่อง</span></div>
+                    
+                    <div class="math-formula" style="font-size:11px;">
+                        MTBF = [Sum ของ MTBF ทุกเครื่อง] / จำนวนเครื่องทั้งหมด<br><br>
+                        - เครื่องที่เสีย: (Available Time - Downtime) / Cases<br>
+                        - เครื่องที่รอด: ${details.operationalMins.toLocaleString()} นาที<br><br>
+                        MTBF (ชม.) = (${(details.totalMtbfSum || 0).toLocaleString()} / ${details.totalMachines}) / 60<br>
+                        MTBF (ชม.) = ${details.mtbf} ชม.
+                    </div>
+                `;
+            }
+
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closeMath() {
+            document.getElementById('mathModal').style.display = 'none';
+            document.getElementById('mathOverlay').style.display = 'none';
+        }
+
+        function switchDataView(view, el) {
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(`view-${view}`).classList.add('active');
+            
+            if (view === 'data') updateDataView();
+            else updateCompareView();
+        }
+
+        function initDataCenter() {
+            const data = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+            if (data.length === 0) return;
+            populateMonthSelectors(data);
+            updateDataView();
+            updateCompareView();
+        }
+
+        function populateMonthSelectors(data) {
+            const months = new Set();
+            data.forEach(r => {
+                const dmy = formatDMY(r.date);
+                if (dmy !== "-") {
+                    const parts = dmy.split('/');
+                    if (parts.length === 3) {
+                        months.add(`${parts[1]}/${parts[2]}`);
+                    }
+                }
+            });
+
+            // Sort months descending
+            const sortedMonths = Array.from(months).sort((a, b) => {
+                const [m1, y1] = a.split('/').map(Number);
+                const [m2, y2] = b.split('/').map(Number);
+                return y2 !== y1 ? y2 - y1 : m2 - m1;
+            });
+
+            const selectors = ['dataMonthSelect', 'compareMonth1', 'compareMonth2'];
+            selectors.forEach((id, idx) => {
+                const el = document.getElementById(id);
+                const currentVal = el.value;
+                el.innerHTML = sortedMonths.map(m => `<option value="${m}">${m}</option>`).join('');
+                if (currentVal && sortedMonths.includes(currentVal)) {
+                    el.value = currentVal;
+                } else if (idx === 2 && sortedMonths.length > 1) {
+                    el.value = sortedMonths[1]; // Default second month for comparison
+                }
+            });
+        }
+
+        function getMachineFrequency(data, monthStr) {
+            const machineData = {};
+            data.forEach(r => {
+                const dmy = formatDMY(r.date);
+                if (dmy === "-") return;
+                const [d, m, y] = dmy.split('/');
+                if (`${m}/${y}` === monthStr) {
+                    const mId = String(r.machineId).trim().toUpperCase();
+                    if (!machineData[mId]) {
+                        machineData[mId] = { count: 0, problems: {} };
+                    }
+                    machineData[mId].count++;
+                    const prob = (r.problem || "ไม่ระบุสาเหตุ").trim();
+                    machineData[mId].problems[prob] = (machineData[mId].problems[prob] || 0) + 1;
+                }
+            });
+
+            return Object.entries(machineData)
+                .map(([machineId, info]) => {
+                    const sortedProbs = Object.entries(info.problems).sort((a, b) => b[1] - a[1]);
+                    return {
+                        machineId,
+                        count: info.count,
+                        topProblem: sortedProbs[0] ? sortedProbs[0][0] : "N/A",
+                        allProblems: sortedProbs
+                    };
+                })
+                .sort((a, b) => b.count - a.count);
+        }
+
+        function showMachineDetail(machineId, month) {
+            const data = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+            const freq = getMachineFrequency(data, month);
+            const machine = freq.find(f => f.machineId === machineId);
+            
+            if (!machine) return;
+
+            const modal = document.getElementById('detailModal');
+            const overlay = document.getElementById('mathOverlay');
+            
+            document.getElementById('detailMachineName').textContent = machineId;
+            document.getElementById('detailMonth').textContent = `ข้อมูลประจำเดือน ${month}`;
+            
+            const breakdownHtml = machine.allProblems.map(p => `
+                <div class="problem-row">
+                    <span class="problem-text">${p[0]}</span>
+                    <span class="problem-count">${p[1]} ครั้ง</span>
+                </div>
+            `).join('');
+            
+            document.getElementById('problemBreakdown').innerHTML = breakdownHtml;
+            
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').style.display = 'none';
+            document.getElementById('mathOverlay').style.display = 'none';
+        }
+
+        function updateDataView() {
+            const month = document.getElementById('dataMonthSelect').value;
+            const data = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+            const freq = getMachineFrequency(data, month);
+
+            const high = freq.filter(f => f.count >= 5);
+            const med = freq.filter(f => f.count >= 2 && f.count <= 4);
+            const low = freq.filter(f => f.count <= 1);
+
+            const renderList = (list) => {
+                if (list.length === 0) return '<p style="color: #444; text-align: center; padding: 20px;">ไม่มีข้อมูล</p>';
+                return list.map(item => `
+                    <div class="machine-item" onclick="showMachineDetail('${item.machineId}', '${month}')" style="cursor: pointer;">
+                        <div>
+                            <div class="machine-name">${item.machineId}</div>
+                            <div class="machine-problem-snippet">${item.topProblem}</div>
+                        </div>
+                        <span class="break-count">${item.count} ครั้ง</span>
+                    </div>
+                `).join('');
+            };
+
+            document.getElementById('highRiskList').innerHTML = renderList(high);
+            document.getElementById('medRiskList').innerHTML = renderList(med);
+            document.getElementById('lowRiskList').innerHTML = renderList(low);
+        }
+
+        function updateCompareView() {
+            const m1 = document.getElementById('compareMonth1').value;
+            const m2 = document.getElementById('compareMonth2').value;
+            const data = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+
+            const freq1 = getMachineFrequency(data, m1).slice(0, 10);
+            const freq2 = getMachineFrequency(data, m2).slice(0, 10);
+
+            const renderCompareList = (list, month) => {
+                return `
+                    <div class="compare-header">
+                        <span class="rank-badge">Top 10 Machines</span>
+                        <h2>${month}</h2>
+                    </div>
+                    ${list.map((item, idx) => `
+                        <div class="compare-machine-card" onclick="showMachineDetail('${item.machineId}', '${month}')" style="cursor: pointer; border-radius: 12px; padding: 15px; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span style="font-size: 14px; color: #444; font-weight: 800;">#${idx + 1}</span>
+                                <div>
+                                    <div class="compare-machine-name">${item.machineId}</div>
+                                    <div class="machine-problem-snippet" style="max-width: 150px;">${item.topProblem}</div>
+                                </div>
+                            </div>
+                            <span class="compare-machine-count">${item.count}</span>
+                        </div>
+                    `).join('')}
+                    ${list.length === 0 ? '<p style="color: #444; text-align: center; padding: 40px;">ไม่มีข้อมูลในเดือนนี้</p>' : ''}
+                `;
+            };
+
+            document.getElementById('compareList1').innerHTML = renderCompareList(freq1, m1);
+            document.getElementById('compareList2').innerHTML = renderCompareList(freq2, m2);
+        }
+
+        window.onload = loadRecords;
+    </script>
+    <!-- Math Detail Modal -->
+    <div class="math-overlay" id="mathOverlay" onclick="closeMath()"></div>
+    <div class="math-modal" id="mathModal">
+        <div class="math-modal-header">
+            <h3 id="mathTitle" style="margin:0">รายละเอียดการคำนวณ</h3>
+            <button onclick="closeMath()" style="background:none; border:none; color:#888; cursor:pointer; font-size:24px;">&times;</button>
+        </div>
+        <div id="mathContent"></div>
+        <button onclick="closeMath()" style="width:100%; margin-top:20px; padding:12px; background:#4cd137; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer;">ปิด</button>
+    </div>
+    <!-- Detail Modal -->
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-header">
+            <h2 id="detailMachineName">Machine ID</h2>
+            <p id="detailMonth">Month Info</p>
+        </div>
+        <div id="problemBreakdown" class="problem-breakdown">
+            <!-- Problem rows -->
+        </div>
+        <button onclick="closeDetail()" style="width:100%; margin-top:25px; padding:15px; background:#007BFF; border:none; border-radius:12px; color:white; font-weight:bold; cursor:pointer; font-size:16px;">ปิด</button>
+    </div>
+</body>
+</html>
