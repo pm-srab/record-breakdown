@@ -19,7 +19,7 @@
 
         .container {
             background-color: #1f3050;
-            padding: 30px 20px; /* Adjusted padding */
+            padding: 30px 20px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             width: 100%;
@@ -208,142 +208,291 @@
             padding-left: 0 !important;
             box-shadow: none !important;
         }
+
+        /* Control Center Styles */
+        .control-center {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 12px 10px;
+            border: none;
+            background: transparent;
+            color: #888;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-btn.active {
+            background: #007BFF;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Pending Records Styles */
+        .record-card {
+            background-color: rgba(13, 26, 51, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-left: 5px solid #007BFF;
+            text-align: left;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-item label {
+            display: block;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .card-item span {
+            font-weight: 600;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .problem-section {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .problem-section label {
+            display: block;
+            font-size: 12px;
+            color: #ffcc00;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .problem-text {
+            margin: 0;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .mini-input-group {
+            display: flex;
+            gap: 10px;
+            background-color: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .mini-input-group input {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .mini-input-group button {
+            padding: 10px 15px;
+            font-size: 14px;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>บันทึกอาการเสีย</h2>
-        
-        <form id="breakdownForm">
-            <div class="form-group">
-                <label for="breakdownTime">เวลาแจ้งซ่อม:</label>
-                <input type="text" id="breakdownTime" placeholder="-- : --" maxlength="5" inputmode="numeric" autocomplete="off" required>
-            </div>
+    <div class="container" id="mainContainer">
+        <div class="control-center">
+            <button class="control-btn" id="btnPending" onclick="switchView('pending')">งานค้าง</button>
+            <button class="control-btn active" id="btnOpen" onclick="switchView('open')">เปิดงาน</button>
+        </div>
 
-            <div class="form-group">
-                <label for="finishTime">เวลาซ่อมเสร็จ:</label>
-                <input type="text" id="finishTime" placeholder="-- : --" maxlength="5" inputmode="numeric" autocomplete="off" required>
-            </div>
-
-            <script>
-                function setupTimeInput(id) {
-                    const el = document.getElementById(id);
-                    el.addEventListener('input', function(e) {
-                        const originalValue = e.target.value;
-                        const originalCursor = e.target.selectionStart;
-                        
-                        let digits = originalValue.replace(/\D/g, '');
-                        let formatted = '';
-
-                        if (digits.length > 2) {
-                            let hh = digits.slice(0, 2);
-                            let mm = digits.slice(2, 4);
-                            if (parseInt(hh) > 23) hh = '23';
-                            if (parseInt(mm) > 59) mm = '59';
-                            formatted = hh + ":" + mm;
-                        } else if (digits.length > 0) {
-                            let hh = digits;
-                            if (parseInt(hh) > 23) hh = '23';
-                            formatted = hh;
-                        }
-
-                        if (originalValue !== formatted) {
-                            e.target.value = formatted;
-                            // Fix cursor position
-                            let newCursor = originalCursor;
-                            if (formatted.length > originalValue.length && originalCursor === 3) {
-                                newCursor = 4;
-                            } else if (formatted.length < originalValue.length && originalCursor === 3) {
-                                newCursor = 2;
-                            }
-                            e.target.setSelectionRange(newCursor, newCursor);
-                        }
-                    });
-                }
-                
-                setupTimeInput('breakdownTime');
-                setupTimeInput('finishTime');
-            </script>
-
-            <div class="form-group">
-                <label for="productionLine">ไลน์การผลิต: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: Line A1 พิมพ์แค่ A1)</span></label>
-                <div class="input-prefix-wrapper">
-                    <span class="prefix">Line </span>
-                    <input type="text" id="productionLine" placeholder="เช่น A1" autocomplete="off" required>
+        <div id="openWorkView" class="view-section active">
+            <h2>บันทึกอาการเสีย</h2>
+            
+            <form id="breakdownForm">
+                <div class="form-group">
+                    <label for="breakdownTime">เวลาแจ้งซ่อม:</label>
+                    <input type="text" id="breakdownTime" placeholder="-- : --" maxlength="5" inputmode="numeric" autocomplete="off" required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="machineId">รหัสเครื่องจักร: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: BP001)</span></label>
-                <input type="text" id="machineId" placeholder="เช่น BP001" autocomplete="off" required>
-            </div>
-
-
-
-            <div class="form-group">
-                <label for="department">หน่วยงาน:</label>
-                <select id="department" required style="
-                    width: 100%; 
-                    padding: 14px; 
-                    padding-right: 40px;
-                    border-radius: 12px; 
-                    border: 2px solid #2c3e50; 
-                    background-color: #0d1a33; 
-                    color: #ffffff; 
-                    font-size: 16px; 
-                    appearance: none;
-                    -webkit-appearance: none;
-                    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-                    background-repeat: no-repeat;
-                    background-position: right 15px center;
-                    background-size: 18px;
-                    transition: all 0.3s ease;">
-                    <option value="" disabled selected>เลือกหน่วยงาน</option>
-                    <option value="Press">Press</option>
-                    <option value="Ass'y">Ass'y</option>
-                    <option value="Project">Project</option>
-                    <option value="UT">UT</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="problem">อาการเสีย <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
-                <textarea id="problem" placeholder="ระบุอาการเสีย (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
-                <div id="problemCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
-            </div>
-
-            <div class="form-group">
-                <label for="solution">วิธีแก้ไข <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
-                <textarea id="solution" placeholder="ระบุวิธีแก้ไข (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
-                <div id="solutionCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
-            </div>
-
-            <div class="form-group">
-                <label>อะไหล่:</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="sparePartName" placeholder="ชื่ออะไหล่" style="flex: 1;" autocomplete="off">
-                    <input type="text" id="sparePartModel" placeholder="รุ่น / โมเดล" style="flex: 1;" autocomplete="off">
+                <div class="form-group">
+                    <label for="finishTime">เวลาซ่อมเสร็จ:</label>
+                    <input type="text" id="finishTime" placeholder="-- : --" maxlength="5" inputmode="numeric" autocomplete="off" required>
                 </div>
-            </div>
 
 
-            <div class="form-group">
-                <label>มีรหัส 7 mean หรือไม่?</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <button type="button" id="hasSevenMeanYes" class="btn-toggle">มี</button>
-                    <button type="button" id="hasSevenMeanNo" class="btn-toggle active">ไม่มี</button>
+
+                <div class="form-group">
+                    <label for="productionLine">ไลน์การผลิต: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: Line A1 พิมพ์แค่ A1)</span></label>
+                    <div class="input-prefix-wrapper">
+                        <span class="prefix">Line </span>
+                        <input type="text" id="productionLine" placeholder="เช่น A1" autocomplete="off" required>
+                    </div>
                 </div>
-                <div id="sevenMeanContainer" style="display: none;">
-                    <label for="sevenMean">รหัส 7 mean:</label>
-                    <input type="text" id="sevenMean" placeholder="ระบุรหัส 7 mean" autocomplete="off">
-                </div>
-            </div>
 
-            <div class="button-group">
-                <button type="submit">บันทึกข้อมูล</button>
-                <a href="index.html" class="btn-link btn-back">กลับหน้าหลัก</a>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="machineId">รหัสเครื่องจักร: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: BP001)</span></label>
+                    <input type="text" id="machineId" placeholder="เช่น BP001" autocomplete="off" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">หน่วยงาน:</label>
+                    <select id="department" required style="
+                        width: 100%; 
+                        padding: 14px; 
+                        padding-right: 40px;
+                        border-radius: 12px; 
+                        border: 2px solid #2c3e50; 
+                        background-color: #0d1a33; 
+                        color: #ffffff; 
+                        font-size: 16px; 
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+                        background-repeat: no-repeat;
+                        background-position: right 15px center;
+                        background-size: 18px;
+                        transition: all 0.3s ease;">
+                        <option value="" disabled selected>เลือกหน่วยงาน</option>
+                        <option value="Press">Press</option>
+                        <option value="Ass'y">Ass'y</option>
+                        <option value="Project">Project</option>
+                        <option value="UT">UT</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="problem">อาการเสีย <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
+                    <textarea id="problem" placeholder="ระบุอาการเสีย (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
+                    <div id="problemCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="solution">วิธีแก้ไข <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
+                    <textarea id="solution" placeholder="ระบุวิธีแก้ไข (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
+                    <div id="solutionCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
+                </div>
+
+                <div class="form-group">
+                    <label>อะไหล่:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="sparePartName" placeholder="ชื่ออะไหล่" style="flex: 1;" autocomplete="off">
+                        <input type="text" id="sparePartModel" placeholder="รุ่น / โมเดล" style="flex: 1;" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>มีรหัส 7 mean หรือไม่?</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" id="hasSevenMeanYes" class="btn-toggle">มี</button>
+                        <button type="button" id="hasSevenMeanNo" class="btn-toggle active">ไม่มี</button>
+                    </div>
+                    <div id="sevenMeanContainer" style="display: none;">
+                        <label for="sevenMean">รหัส 7 mean:</label>
+                        <input type="text" id="sevenMean" placeholder="ระบุรหัส 7 mean" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit">บันทึกข้อมูล</button>
+                    <a href="index.html" class="btn-link btn-back">กลับหน้าหลัก</a>
+                </div>
+            </form>
+        </div>
+
+        <div id="pendingWorkView" class="view-section">
+            <h2>บันทึกอาการเสีย (งานค้าง)</h2>
+            <form id="pendingForm">
+                <div class="form-group">
+                    <label for="p_breakdownTime">เวลาแจ้งซ่อม:</label>
+                    <input type="text" id="p_breakdownTime" placeholder="-- : --" maxlength="5" inputmode="numeric" autocomplete="off" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="p_productionLine">ไลน์การผลิต: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: Line A1 พิมพ์แค่ A1)</span></label>
+                    <div class="input-prefix-wrapper">
+                        <span class="prefix">Line </span>
+                        <input type="text" id="p_productionLine" placeholder="เช่น A1" autocomplete="off" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="p_machineId">รหัสเครื่องจักร: <span style="font-weight: normal; color: #555; font-size: 12px;">(ตัวอย่าง: BP001)</span></label>
+                    <input type="text" id="p_machineId" placeholder="เช่น BP001" autocomplete="off" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="p_department">หน่วยงาน:</label>
+                    <select id="p_department" required style="
+                        width: 100%; 
+                        padding: 14px; 
+                        padding-right: 40px;
+                        border-radius: 12px; 
+                        border: 2px solid #2c3e50; 
+                        background-color: #0d1a33; 
+                        color: #ffffff; 
+                        font-size: 16px; 
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+                        background-repeat: no-repeat;
+                        background-position: right 15px center;
+                        background-size: 18px;
+                        transition: all 0.3s ease;">
+                        <option value="" disabled selected>เลือกหน่วยงาน</option>
+                        <option value="Press">Press</option>
+                        <option value="Ass'y">Ass'y</option>
+                        <option value="Project">Project</option>
+                        <option value="UT">UT</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="p_problem">อาการเสีย <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
+                    <textarea id="p_problem" placeholder="ระบุอาการเสีย (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
+                    <div id="p_problemCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit">บันทึกงานค้าง</button>
+                    <a href="index.html" class="btn-link btn-back">กลับหน้าหลัก</a>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -398,6 +547,136 @@
 
         const form = document.getElementById('breakdownForm');
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+
+        function setupTimeInput(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', function(e) {
+                const originalValue = e.target.value;
+                const originalCursor = e.target.selectionStart;
+                
+                let digits = originalValue.replace(/\D/g, '');
+                let formatted = '';
+
+                if (digits.length > 2) {
+                    let hh = digits.slice(0, 2);
+                    let mm = digits.slice(2, 4);
+                    if (parseInt(hh) > 23) hh = '23';
+                    if (parseInt(mm) > 59) mm = '59';
+                    formatted = hh + ":" + mm;
+                } else if (digits.length > 0) {
+                    let hh = digits;
+                    if (parseInt(hh) > 23) hh = '23';
+                    formatted = hh;
+                }
+
+                if (originalValue !== formatted) {
+                    e.target.value = formatted;
+                    // Fix cursor position
+                    let newCursor = originalCursor;
+                    if (formatted.length > originalValue.length && originalCursor === 3) {
+                        newCursor = 4;
+                    } else if (formatted.length < originalValue.length && originalCursor === 3) {
+                        newCursor = 2;
+                    }
+                    e.target.setSelectionRange(newCursor, newCursor);
+                }
+            });
+        }
+        
+        // View Switching Logic
+        function switchView(view) {
+            const openView = document.getElementById('openWorkView');
+            const pendingView = document.getElementById('pendingWorkView');
+            const btnOpen = document.getElementById('btnOpen');
+            const btnPending = document.getElementById('btnPending');
+
+            if (view === 'open') {
+                openView.classList.add('active');
+                pendingView.classList.remove('active');
+                btnOpen.classList.add('active');
+                btnPending.classList.remove('active');
+            } else {
+                openView.classList.remove('active');
+                pendingView.classList.add('active');
+                btnOpen.classList.remove('active');
+                btnPending.classList.add('active');
+                // Setup counters for pending form
+                setupCharCounter('p_problem', 'p_problemCount', 20);
+                setupTimeInput('p_breakdownTime');
+                // Force Uppercase
+                document.getElementById('p_productionLine').oninput = function() {
+                    this.value = this.value.toUpperCase();
+                };
+                document.getElementById('p_machineId').oninput = function() {
+                    this.value = this.value.toUpperCase();
+                };
+            }
+        }
+
+        setupTimeInput('breakdownTime');
+        setupTimeInput('finishTime');
+
+        // Pending Form Submit Logic
+        document.getElementById('pendingForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> กำลังบันทึก...';
+
+            const time = document.getElementById('p_breakdownTime').value;
+            const line = "Line " + document.getElementById('p_productionLine').value.trim();
+            const machineId = document.getElementById('p_machineId').value.trim();
+            const department = document.getElementById('p_department').value.trim();
+            const problem = document.getElementById('p_problem').value.trim();
+
+            const breakdownEntry = {
+                id: Date.now(),
+                time: time,
+                line: line,
+                machineId: machineId,
+                department: department,
+                problem: problem,
+                solution: "-",
+                sparePart: "-",
+                finishTime: "-",
+                duration: "-",
+                sevenMean: "",
+                caseCount: 1,
+                date: "'" + String(new Date().getDate()).padStart(2, '0') + '/' + String(new Date().getMonth() + 1).padStart(2, '0') + '/' + new Date().getFullYear()
+            };
+
+            try {
+                const formData = new URLSearchParams();
+                for (const key in breakdownEntry) {
+                    formData.append(key, breakdownEntry[key]);
+                }
+
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                const data = localStorage.getItem("breakdowns");
+                const breakdowns = data ? JSON.parse(data) : [];
+                breakdowns.push(breakdownEntry);
+                localStorage.setItem("breakdowns", JSON.stringify(breakdowns));
+
+                alert("บันทึกงานค้างสำเร็จ!");
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                console.error(error);
+                alert("เกิดข้อผิดพลาด แต่ข้อมูลถูกบันทึกไว้ในเครื่องแล้ว");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        };
 
         form.onsubmit = async (e) => {
             e.preventDefault();

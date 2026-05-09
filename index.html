@@ -13,6 +13,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background-color: #1a1a1a; 
     display: flex; 
+    flex-direction: column;
     justify-content: center; 
     align-items: center; 
     min-height: 100vh; 
@@ -73,10 +74,39 @@ h3 {
 .btn-menu:active {
     transform: translateY(-1px);
 }
+
+.noti-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.noti-badge {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    display: none;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.noti-badge.press, .noti-badge.assy {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+}
 </style> 
 </head> 
 
 <body> 
+<div class="noti-container" style="width: 100%; max-width: 450px; margin-bottom: 15px;">
+    <div id="pressNoti" class="noti-badge press"></div>
+    <div id="assyNoti" class="noti-badge assy"></div>
+</div>
 <div class="container"> 
     <h1>Maintenance SRAB</h1>
     <h3>Monitoring System</h3>
@@ -93,5 +123,81 @@ h3 {
         ปิดรหัส 7 mean
     </a>
 </div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+
+    async function checkPending() {
+        const noti = document.getElementById('pendingNoti');
+        
+        // 1. First check local storage for immediate display
+        const localData = localStorage.getItem("breakdowns");
+        if (localData) {
+            renderNoti(JSON.parse(localData));
+        }
+
+        // 2. Fetch fresh data from Google Sheets in background
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const googleData = await response.json();
+            
+            if (googleData && Array.isArray(googleData)) {
+                // Filter and map to our local format (matching dashboard.html logic)
+                const validRows = googleData.filter(row => row[0] && row[2]);
+                const cloudBreakdowns = validRows.map((row, index) => ({
+                    date: row[0],
+                    line: row[1],
+                    machineId: row[2],
+                    caseCount: 1,
+                    time: row[3],
+                    finishTime: row[4],
+                    duration: row[5],
+                    department: row[6],
+                    problem: row[7],
+                    solution: row[8],
+                    sparePart: row[9],
+                    sevenMean: row[10],
+                    id: index
+                }));
+                
+                localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
+                renderNoti(cloudBreakdowns);
+            }
+        } catch (e) {
+            console.error("Error fetching from Google Sheets:", e);
+        }
+    }
+
+    function renderNoti(breakdowns) {
+        const pressNoti = document.getElementById('pressNoti');
+        const assyNoti = document.getElementById('assyNoti');
+        
+        const pressPending = breakdowns.filter(r => {
+            const isPending = !r.sevenMean || String(r.sevenMean).trim() === "" || r.sevenMean === "-";
+            return isPending && r.department === "Press";
+        });
+        
+        const assyPending = breakdowns.filter(r => {
+            const isPending = !r.sevenMean || String(r.sevenMean).trim() === "" || r.sevenMean === "-";
+            return isPending && r.department === "Ass'y";
+        });
+        
+        if (pressPending.length > 0) {
+            pressNoti.style.display = 'block';
+            pressNoti.innerHTML = `⚠️ งานค้าง Press: ${pressPending.length} รายการ`;
+        } else {
+            pressNoti.style.display = 'none';
+        }
+        
+        if (assyPending.length > 0) {
+            assyNoti.style.display = 'block';
+            assyNoti.innerHTML = `⚠️ งานค้าง Ass'y: ${assyPending.length} รายการ`;
+        } else {
+            assyNoti.style.display = 'none';
+        }
+    }
+    
+    window.onload = checkPending;
+</script>
 </body> 
 </html>
