@@ -142,23 +142,24 @@ h3 {
             const googleData = await response.json();
             
             if (googleData && Array.isArray(googleData)) {
-                // Filter and map to our local format (matching dashboard.html logic)
-                const validRows = googleData.filter(row => row[0] && row[2]);
-                const cloudBreakdowns = validRows.map((row, index) => ({
-                    date: row[0],
-                    line: row[1],
-                    machineId: row[2],
-                    caseCount: 1,
-                    time: row[3],
-                    finishTime: row[4],
-                    duration: row[5],
-                    department: row[6],
-                    problem: row[7],
-                    solution: row[8],
-                    sparePart: row[9],
-                    sevenMean: row[10],
-                    id: index
-                }));
+                // Map with original index from googleData to ensure correct row tracking
+                const cloudBreakdowns = googleData
+                    .map((row, originalIndex) => ({
+                        date: row[0],
+                        line: row[1],
+                        machineId: row[2],
+                        caseCount: 1,
+                        time: row[3],
+                        finishTime: row[4],
+                        duration: row[5],
+                        department: row[6],
+                        problem: row[7],
+                        solution: row[8],
+                        sparePart: row[9],
+                        sevenMean: row[10],
+                        id: originalIndex // This is the real row index in the sheet!
+                    }))
+                    .filter((r, idx) => idx > 0 && r.date && r.machineId); // Skip header and empty rows
                 
                 localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
                 renderNoti(cloudBreakdowns);
