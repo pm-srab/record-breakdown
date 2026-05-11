@@ -262,6 +262,59 @@
             filter: brightness(1.1);
         }
 
+        /* Improved Form Field Styles */
+        .form-field input, .form-field textarea {
+            width: 100%;
+            background-color: #0d1a33;
+            border: 2px solid #2c3e50;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-field input:focus, .form-field textarea:focus {
+            outline: none;
+            border-color: #007BFF;
+            background-color: #162447;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Department Filter Styles */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .dept-btn {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dept-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .dept-btn.active {
+            background-color: #007BFF;
+            color: white;
+            border-color: #007BFF;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+
         @media (max-width: 600px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -279,6 +332,14 @@
         <div class="control-center">
             <button class="control-btn active" id="tabSevenMean" onclick="switchTab('sevenMean')">ปิดรหัส 7 mean</button>
             <button class="control-btn" id="tabPending" onclick="switchTab('pending')">ปิดงานค้าง</button>
+        </div>
+
+        <div class="filter-container" id="deptFilterContainer">
+            <button class="dept-btn active" onclick="switchDept('All', this)">ทั้งหมด</button>
+            <button class="dept-btn" onclick="switchDept('Press', this)">Press</button>
+            <button class="dept-btn" onclick="switchDept('Ass\'y', this)">Ass'y</button>
+            <button class="dept-btn" onclick="switchDept('Project', this)">Project</button>
+            <button class="dept-btn" onclick="switchDept('UT', this)">UT</button>
         </div>
 
         <div id="recordsList">
@@ -353,11 +414,20 @@
         }
 
         let currentTab = 'sevenMean';
+        let currentDept = 'All';
 
         function switchTab(tab) {
             currentTab = tab;
             document.getElementById('tabSevenMean').classList.toggle('active', tab === 'sevenMean');
             document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+            loadRecords();
+        }
+
+        function switchDept(dept, btn) {
+            currentDept = dept;
+            const buttons = document.querySelectorAll('.dept-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             loadRecords();
         }
 
@@ -378,13 +448,16 @@
                 const response = await fetch(SCRIPT_URL);
                 const googleData = await response.json();
                 if (googleData && Array.isArray(googleData)) {
-                    const validRows = googleData.filter(row => row[0] && row[2]);
-                    const cloudBreakdowns = validRows.map((row, index) => ({
-                        date: row[0], line: row[1], machineId: row[2], caseCount: 1,
-                        time: row[3], finishTime: row[4], duration: row[5], department: row[6],
-                        problem: row[7], solution: row[8], sparePart: row[9], sevenMean: row[10],
-                        id: index
-                    }));
+                    // Map with original index from googleData to ensure correct row update
+                    const cloudBreakdowns = googleData
+                        .map((row, originalIndex) => ({
+                            date: row[0], line: row[1], machineId: row[2], caseCount: 1,
+                            time: row[3], finishTime: row[4], duration: row[5], department: row[6],
+                            problem: row[7], solution: row[8], sparePart: row[9], sevenMean: row[10],
+                            id: originalIndex // This is the real row index in the sheet!
+                        }))
+                        .filter((r, idx) => idx > 0 && r.date && r.machineId); // Skip header and empty rows
+
                     localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
                     renderByTab(cloudBreakdowns, list);
                 }
@@ -392,9 +465,15 @@
         }
 
         function renderByTab(breakdowns, list) {
+            // Apply Department Filter
+            let filtered = breakdowns;
+            if (currentDept !== 'All') {
+                filtered = breakdowns.filter(r => r.department === currentDept);
+            }
+
             if (currentTab === 'sevenMean') {
                 // Filter: Finished work but missing 7-mean
-                const pending = breakdowns.filter(r => {
+                const pending = filtered.filter(r => {
                     const isFinished = r.finishTime && r.finishTime !== "-" && String(r.finishTime).trim() !== "";
                     const missingSeven = !r.sevenMean || r.sevenMean === "-" || String(r.sevenMean).trim() === "";
                     return isFinished && missingSeven;
@@ -402,7 +481,7 @@
                 renderSevenMeanTab(pending, list);
             } else {
                 // Filter: Open work
-                const openWork = breakdowns.filter(r => {
+                const openWork = filtered.filter(r => {
                     return !r.finishTime || r.finishTime === "-" || String(r.finishTime).trim() === "";
                 });
                 renderPendingTab(openWork, list);
