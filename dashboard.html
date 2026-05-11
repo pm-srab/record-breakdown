@@ -1409,7 +1409,10 @@
             // 1. Load from localStorage immediately so the user sees their data right away
             const localData = localStorage.getItem("breakdowns");
             if (localData) {
-                breakdowns = JSON.parse(localData);
+                breakdowns = JSON.parse(localData).filter(r => {
+                    const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                    return !isHeader;
+                });
                 updateStats(breakdowns);
                 renderCharts(breakdowns);
                 displayRecords(breakdowns);
@@ -1440,7 +1443,10 @@
                             sevenMean: row[10],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
-                        .filter((r, idx) => idx > 0 && r.date && r.machineId); // Skip header and empty rows
+                        .filter((r, idx) => {
+                            const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                            return idx > 0 && r.date && r.machineId && !isHeader;
+                        }); // Skip header and empty rows
                     
                     localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
                     

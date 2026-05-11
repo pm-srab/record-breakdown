@@ -438,7 +438,12 @@
             // 1. Show local data first
             try {
                 const data = localStorage.getItem("breakdowns");
-                if (data) breakdowns = JSON.parse(data);
+                if (data) {
+                    breakdowns = JSON.parse(data).filter(r => {
+                        const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                        return !isHeader;
+                    });
+                }
             } catch (err) { console.error(err); }
 
             renderByTab(breakdowns, list);
@@ -456,7 +461,10 @@
                             problem: row[7], solution: row[8], sparePart: row[9], sevenMean: row[10],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
-                        .filter((r, idx) => idx > 0 && r.date && r.machineId); // Skip header and empty rows
+                        .filter((r, idx) => {
+                            const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                            return idx > 0 && r.date && r.machineId && !isHeader;
+                        }); // Skip header and empty rows
 
                     localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
                     renderByTab(cloudBreakdowns, list);

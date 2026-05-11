@@ -133,7 +133,11 @@ h3 {
         // 1. First check local storage for immediate display
         const localData = localStorage.getItem("breakdowns");
         if (localData) {
-            renderNoti(JSON.parse(localData));
+            const breakdowns = JSON.parse(localData).filter(r => {
+                const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                return !isHeader;
+            });
+            renderNoti(breakdowns);
         }
 
         // 2. Fetch fresh data from Google Sheets in background
@@ -159,7 +163,10 @@ h3 {
                         sevenMean: row[10],
                         id: originalIndex // This is the real row index in the sheet!
                     }))
-                    .filter((r, idx) => idx > 0 && r.date && r.machineId); // Skip header and empty rows
+                    .filter((r, idx) => {
+                        const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
+                        return idx > 0 && r.date && r.machineId && !isHeader;
+                    }); // Skip header and empty rows
                 
                 localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
                 renderNoti(cloudBreakdowns);
