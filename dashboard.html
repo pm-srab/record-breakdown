@@ -1527,6 +1527,12 @@
         }
 
         async function deleteRecord(id, btnElement) {
+            const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบข้อมูล:");
+            if (password !== "1234") {
+                if (password !== null) alert("รหัสผ่านไม่ถูกต้อง!");
+                return;
+            }
+            
             if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
                 
                 // Show loading state

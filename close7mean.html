@@ -589,6 +589,11 @@
                 return;
             }
 
+            if (sevenMean && sevenMean !== "-" && sevenMean.length !== 10) {
+                alert("รหัส 7 mean ต้องมีความยาว 10 ตัวอักษร");
+                return;
+            }
+
             const originalText = btn.innerText;
             btn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span> กำลังบันทึก...';
@@ -652,6 +657,12 @@
             
             if (!val) {
                 alert("กรุณากรอกรหัส 7 mean");
+                input.focus();
+                return;
+            }
+
+            if (val.length !== 10) {
+                alert("รหัส 7 mean ต้องมีความยาว 10 ตัวอักษร");
                 input.focus();
                 return;
             }
