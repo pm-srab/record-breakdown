@@ -1658,8 +1658,8 @@
             
             // Sort data chronologically using our standardized format
             const sortedData = [...data].sort((a, b) => {
-                const partsA = formatDMY(a.date).split('/');
-                const partsB = formatDMY(b.date).split('/');
+                const partsA = formatDMY(a.date).split(' ')[0].split('/');
+                const partsB = formatDMY(b.date).split(' ')[0].split('/');
                 if (partsA.length === 3 && partsB.length === 3) {
                     const dateA = new Date(`${partsA[2]}-${partsA[1]}-${partsA[0]}`);
                     const dateB = new Date(`${partsB[2]}-${partsB[1]}-${partsB[0]}`);
@@ -1941,7 +1941,7 @@
                     if (matchingMachines.length === 0) return;
 
                     if (r.date) {
-                        const fullDate = formatDMY(r.date);
+                        const fullDate = formatDMY(r.date).split(' ')[0];
                         if (fullDate !== "-") {
                             const parts = fullDate.split('/');
                             if (parts.length === 3) {
@@ -2207,7 +2207,7 @@
         function populateMonthSelectors(data) {
             const months = new Set();
             data.forEach(r => {
-                const dmy = formatDMY(r.date);
+                const dmy = formatDMY(r.date).split(' ')[0];
                 if (dmy !== "-") {
                     const parts = dmy.split('/');
                     if (parts.length === 3) {
@@ -2239,7 +2239,7 @@
         function getMachineFrequency(data, monthStr) {
             const machineData = {};
             data.forEach(r => {
-                const dmy = formatDMY(r.date);
+                const dmy = formatDMY(r.date).split(' ')[0];
                 if (dmy === "-") return;
                 const [d, m, y] = dmy.split('/');
                 if (`${m}/${y}` === monthStr) {
