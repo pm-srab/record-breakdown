@@ -601,7 +601,7 @@
                 let breakdowns = JSON.parse(localStorage.getItem("breakdowns")) || [];
                 const record = breakdowns.find(r => r.id === id);
                 if (record && record.time && finishTime) {
-                    const [h1, m1] = record.time.split(':').map(Number);
+                    const [h1, m1] = formatTimeOnly(record.time).split(':').map(Number);
                     const [h2, m2] = finishTime.split(':').map(Number);
                     let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
                     if (diff < 0) diff += 1440;

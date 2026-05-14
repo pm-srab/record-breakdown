@@ -1483,9 +1483,9 @@
                 let durationMinutes = record.duration || "-";
                 
                 // Recalculate from start/end times for maximum accuracy
-                if (record.time && record.finishTime) {
-                    const [h1, m1] = String(record.time).split(':').map(Number);
-                    const [h2, m2] = String(record.finishTime).split(':').map(Number);
+                if (record.time && record.finishTime && record.finishTime !== "-") {
+                    const [h1, m1] = formatTimeOnly(record.time).split(':').map(Number);
+                    const [h2, m2] = formatTimeOnly(record.finishTime).split(':').map(Number);
                     if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
                         let startMin = h1 * 60 + m1;
                         let endMin = h2 * 60 + m2;
