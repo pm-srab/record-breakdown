@@ -1349,10 +1349,10 @@
                 return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
             }
 
-            // 2. Strict DD/MM/YYYY (handles our new save format)
-            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            // 2. Strict DD/MM/YYYY (handles our new save format with optional time)
+            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})(.*)$/);
             if (strictDmyMatch) {
-                return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}`;
+                return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}${strictDmyMatch[4]}`;
             }
             
             // 3. Try Date object (handles legacy M/D/Y data without leading zeros)
