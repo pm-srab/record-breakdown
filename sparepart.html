@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เบิกอะไหล่ (Spare Part) - Maintenance System</title>
+    <style>
+        :root {
+            --primary: #007BFF;
+            --primary-glow: rgba(0, 123, 255, 0.4);
+            --bg: #1a1a1a;
+            --card-bg: #1f3050;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* Search & Filter */
+        .search-container {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        /* Spare Parts Grid */
+        .parts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .part-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .part-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .part-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .part-card:hover::before {
+            opacity: 1;
+        }
+
+        .part-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .part-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .part-code {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: monospace;
+        }
+
+        .stock-badge {
+            background: rgba(0, 123, 255, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .part-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Filter Card Styles */
+        .filter-card {
+            background: #000000;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .select-custom {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            cursor: pointer;
+            transition: 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 18px;
+        }
+
+        .select-custom:focus {
+            border-color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: #000000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            margin-top: 20px;
+        }
+
+        .spare-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        .spare-table th {
+            background: rgba(0, 123, 255, 0.1);
+            color: var(--primary);
+            text-align: left;
+            padding: 15px 20px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .spare-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .spare-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .spare-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: rgba(46, 213, 115, 0.1);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.2);
+        }
+
+        .badge-repair {
+            background: rgba(255, 165, 2, 0.1);
+            color: #ffa502;
+            border: 1px solid rgba(255, 165, 2, 0.2);
+        }
+
+        .btn-edit {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            vertical-align: middle;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .col-fixed {
+            text-align: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        /* Fixed widths for specific columns */
+        .w-stock { width: 90px; }
+        .w-location { width: 140px; }
+        .w-action { width: 110px; }
+
+        .btn-edit, .btn-history {
+            margin: 0 4px;
+        }
+
+        .btn-history {
+            background: rgba(0, 123, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            vertical-align: middle;
+        }
+
+        .btn-history:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px var(--primary-glow);
+        }
+
+        /* History Modal Specific Styles */
+        .history-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-right: 5px;
+        }
+
+        .history-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .history-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+            transition: 0.3s;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .history-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .history-machine {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .history-problem {
+            font-size: 13px;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .usage-badge {
+            background: var(--primary);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .no-history {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--text-dim);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-card {
+            background: #111111;
+            width: 95%;
+            max-width: 650px;
+            border-radius: 20px;
+            padding: 25px;
+            margin: auto; /* Help with centering in scrollable container */
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-title {
+            margin: 0 0 15px 0;
+            font-size: 22px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .modal-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .modal-field {
+            margin-bottom: 15px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .modal-value {
+            font-size: 16px;
+            color: #fff;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 5px;
+        }
+
+        .input-number {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 18px;
+            outline: none;
+            text-align: center;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .input-number:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-modal {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.2;
+        }
+
+        @media (max-width: 600px) {
+            .search-container {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>คลังอะไหล่ (Spare Parts)</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-back" onclick="openGlobalHistoryModal()" style="background: rgba(0, 123, 255, 0.1); border-color: var(--primary); color: var(--primary); cursor: pointer;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    สรุปการใช้งาน
+                </button>
+                <a href="index.html" class="btn-back">
+                    กลับหน้าหลัก
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-group">
+                <label class="filter-label">ค้นหาด้วย</label>
+                <select class="select-custom" id="searchType">
+                    <option value="name">ชื่ออะไหล่ (Part Name)</option>
+                    <option value="model">รุ่น (Model)</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">คำค้นหา</label>
+                <input type="text" class="search-box" id="searchInput" placeholder="พิมพ์เพื่อค้นหา...">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="spare-table">
+                <thead>
+                    <tr>
+                        <th>Part Name</th>
+                        <th>Model</th>
+                        <th>Brand Name</th>
+                        <th class="col-fixed w-stock">Stock</th>
+                        <th>Location</th>
+                        <th class="col-fixed w-action">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="spareTableBody">
+                    <tr id="tableLoader">
+                        <td colspan="6" style="text-align: center; padding: 50px;">
+                            <div class="loading-spinner" style="width: 30px; height: 30px; border-width: 3px; margin: 0 auto 15px auto;"></div>
+                            <div style="color: var(--text-dim); font-size: 14px;">กำลังโหลดข้อมูลจาก Google Sheet...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container" id="paginationCtrl" style="display: none; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid var(--border);">
+            <div style="font-size: 14px; color: var(--text-dim);" id="paginationInfo">Showing 0 to 0 of 0 items</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-back" id="prevPageBtn" onclick="prevPage()" style="padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none;">Previous</button>
+                <button class="btn-back" id="nextPageBtn" onclick="nextPage()" style="padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none;">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <h2 class="modal-title">เบิกอะไหล่</h2>
+            
+            <div class="modal-grid">
+                <div class="modal-col">
+                    <div class="modal-field">
+                        <label class="modal-label">ชื่ออะไหล่ (Part Name)</label>
+                        <div class="modal-value" id="modalPartName">-</div>
+                    </div>
+
+                    <div class="modal-field">
+                        <label class="modal-label">รุ่น (Model)</label>
+                        <div class="modal-value" id="modalModel">-</div>
+                    </div>
+
+                    <div class="modal-field">
+                        <label class="modal-label">คงเหลือ (Stock)</label>
+                        <div class="modal-value" id="modalStock">0</div>
+                    </div>
+                </div>
+
+                <div class="modal-col">
+                    <div class="modal-field">
+                        <label class="modal-label">จำนวนที่เบิก (USAGE)</label>
+                        <input type="number" class="input-number" id="modalUsage" value="1" min="1">
+                    </div>
+
+                    <div class="modal-field">
+                        <label class="modal-label">วันที่เบิก (DATE)</label>
+                        <input type="date" class="input-number" id="modalDate" style="text-align: left; font-size: 14px;">
+                    </div>
+
+                    <div class="modal-field">
+                        <label class="modal-label">ใช้ที่ไหน (LOCATION / MACHINE)</label>
+                        <input type="text" class="input-number" id="modalLocation" placeholder="เช่น RB131 หรือ Line CO2" style="text-align: left; font-size: 14px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
+                <button class="btn-modal btn-save" onclick="saveUsage()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- History Modal (Used for Standalone Monthly Summary) -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-card" style="max-width: 900px; width: 95%;">
+            <h2 class="modal-title" id="historyModalTitle">สรุปการเบิกอะไหล่รายเดือน</h2>
+            
+            <div id="historyPartInfo" style="display: none;"></div>
+
+            <!-- Month Filter Section -->
+            <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 250px;">
+                    <span style="color: var(--text-dim); font-size: 14px; white-space: nowrap;">เลือกแสดงเดือน:</span>
+                    <select id="summaryMonthFilter" style="flex: 1; padding: 8px 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; cursor: pointer; outline: none; transition: border-color 0.2s;" onchange="renderSummaryTable()">
+                    </select>
+                </div>
+                <span class="usage-badge" id="usageBadgeLabel" style="margin: 0; padding: 8px 16px;">รวมรายการที่มีการแก้ไข: <span id="usageCountBadge">0</span> รายการ</span>
+            </div>
+
+            <!-- Responsive Table Container -->
+            <div class="history-container" id="historyList" style="max-height: 450px; overflow-y: auto;">
+                <div class="no-history">กำลังคำนวณข้อมูล...</div>
+            </div>
+
+            <div class="modal-actions" style="grid-template-columns: 1fr; margin-top: 20px;">
+                <button class="btn-modal btn-cancel" onclick="closeHistoryModal()">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SPARE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-s4hRzbMOI54WXJEh1KAJR547qVVF2OWcR0uDFtOQTTJVbHdGZMTgS7FS6Pm3Jmjb/exec";
+
+        let spareParts = [];
+        let filteredParts = [];
+        let currentPage = 1;
+        const pageSize = 25;
+
+        let activeRowNumber = null;
+        let activePartStock = 0;
+
+        function formatDMY(dateStr) {
+            if (!dateStr) return "-";
+            const str = String(dateStr).replace(/^'/, '');
+            
+            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+            if (strictDmyMatch) return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}`;
+            
+            try {
+                const d = new Date(dateStr);
+                if (!isNaN(d.getTime())) {
+                    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                }
+            } catch (e) {}
+            return dateStr;
+        }
+
+        function formatTimeOnly(timeStr) {
+            if (!timeStr || timeStr === "-") return "";
+            const str = String(timeStr);
+            const match = str.match(/(\d{1,2}:\d{2})/);
+            return match ? match[1] : "";
+        }
+
+        // Fetch Spare Parts from Google Sheets
+        async function fetchSpareParts() {
+            // Load local cache immediately for zero lag
+            const localData = localStorage.getItem("spare_parts");
+            if (localData) {
+                spareParts = JSON.parse(localData);
+                filterParts();
+            }
+
+            try {
+                const response = await fetch(SPARE_SCRIPT_URL + "?_t=" + Date.now());
+                const googleData = await response.json();
+                if (googleData && Array.isArray(googleData)) {
+                    // Row 0 is header row: ["Part name", "Model", "Brand name", "Stock", "Location", "Edit"]
+                    spareParts = googleData
+                        .map((row, index) => ({
+                            name: row[0],
+                            model: row[1],
+                            brand: row[2],
+                            stock: parseInt(row[3]) || 0,
+                            location: row[4] || "-",
+                            edit: row[5] || "",
+                            rowNumber: index + 1 // exact row in sheet (1-based)
+                        }))
+                        .filter((item, index) => {
+                            const isHeader = String(item.name).toLowerCase().includes("part name") || index === 0;
+                            return !isHeader && item.name;
+                        });
+
+                    localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+                    filterParts();
+                }
+            } catch (e) {
+                console.error("Fetch spare parts error:", e);
+                if (!spareParts.length) {
+                    document.getElementById('spareTableBody').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                                เกิดข้อผิดพลาดในการโหลดข้อมูล แต่ประวัติในระบบจะยังคงใช้งานได้
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        function filterParts() {
+            const searchType = document.getElementById('searchType').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            filteredParts = spareParts.filter(part => {
+                if (!searchInput) return true;
+                if (searchType === 'name') {
+                    return String(part.name || '').toLowerCase().includes(searchInput);
+                } else {
+                    return String(part.model || '').toLowerCase().includes(searchInput);
+                }
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('spareTableBody');
+            const pagCtrl = document.getElementById('paginationCtrl');
+            
+            if (filteredParts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                            <div>ไม่พบข้อมูลอะไหล่ที่ค้นหา</div>
+                        </td>
+                    </tr>
+                `;
+                pagCtrl.style.display = 'none';
+                return;
+            }
+
+            // Calculate Pagination
+            const totalItems = filteredParts.length;
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, totalItems);
+            
+            const pagedParts = filteredParts.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pagedParts.map(part => `
+                <tr>
+                    <td style="font-weight: 700;">${part.name}</td>
+                    <td style="font-family: monospace; color: var(--text-dim);">${part.model}</td>
+                    <td>${part.brand}</td>
+                    <td class="col-fixed"><span class="stock-badge" style="${part.stock <= 5 ? 'background: rgba(255, 71, 87, 0.1); color: #ff4757;' : ''}">${part.stock}</span></td>
+                    <td>${part.location}</td>
+                    <td class="col-fixed w-action">
+                        <button class="btn-edit" onclick="openEditModal('${part.name.replace(/'/g, "\\'")}', '${part.model.replace(/'/g, "\\'")}', ${part.stock}, '${part.location.replace(/'/g, "\\'")}', ${part.rowNumber})">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Update Pagination display
+            pagCtrl.style.display = 'flex';
+            document.getElementById('paginationInfo').innerText = `Showing ${startIndex + 1} to ${endIndex} of ${totalItems} items`;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            
+            document.getElementById('prevPageBtn').style.opacity = currentPage === 1 ? '0.4' : '1';
+            document.getElementById('prevPageBtn').style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
+            document.getElementById('nextPageBtn').style.opacity = currentPage === totalPages ? '0.4' : '1';
+            document.getElementById('nextPageBtn').style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredParts.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        async function openGlobalHistoryModal() {
+            document.getElementById('historyModalTitle').innerText = "สรุปการเบิกอะไหล่รายเดือน";
+            document.getElementById('historyPartInfo').style.display = 'none';
+            document.getElementById('historyList').innerHTML = '<div class="no-history">กำลังโหลดข้อมูลประวัติ...</div>';
+            document.getElementById('usageBadgeLabel').innerHTML = `รวมรายการที่มีการแก้ไข: <span id="usageCountBadge">0</span> รายการ`;
+            
+            document.getElementById('historyModal').style.display = 'flex';
+
+            try {
+                const response = await fetch(SPARE_SCRIPT_URL + "?action=getHistory&_t=" + Date.now());
+                const googleData = await response.json();
+                
+                if (googleData && Array.isArray(googleData) && googleData.length > 1) {
+                    // Row 0 is header row: ["วันที่แก้ไข", "ชื่ออะไหล่", "รุ่น", "ยี่ห้อ", "จำนวนที่เบิก", "ตำแหน่ง", "คงเหลือ"]
+                    const historyItems = googleData
+                        .map((row, index) => ({
+                            date: row[0],
+                            name: row[1],
+                            model: row[2],
+                            brand: row[3],
+                            quantity: parseInt(row[4]) || 0,
+                            location: row[5] || "-",
+                            stock: parseInt(row[6]) || 0,
+                            rowNumber: index + 1
+                        }))
+                        .filter((item, index) => {
+                            const isHeader = String(item.date).includes("วันที่แก้ไข") || index === 0;
+                            return !isHeader && item.date && item.name;
+                        });
+
+                    if (historyItems.length === 0) {
+                        document.getElementById('historyList').innerHTML = '<div class="no-history">ไม่พบประวัติการแก้ไขในระบบ</div>';
+                        document.getElementById('summaryMonthFilter').innerHTML = '<option value="">ไม่มีข้อมูล</option>';
+                        return;
+                    }
+
+                    const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                    const monthlySummary = {};
+
+                    historyItems.forEach(item => {
+                        try {
+                            let cleanDate = String(item.date).trim();
+                            // If it's an ISO timestamp from Google Sheets like "2026-05-18T01:57:08.000Z", parse and convert it
+                            if (cleanDate.includes('T')) {
+                                const d = new Date(cleanDate);
+                                if (!isNaN(d.getTime())) {
+                                    const pad = (n) => String(n).padStart(2, '0');
+                                    cleanDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                                }
+                            }
+
+                            // Also parse dates that might be formatted as "Mon May 18 2026 08:57:10 GMT+0700..."
+                            if (cleanDate.includes('GMT') || isNaN(Date.parse(cleanDate.split(' ')[0])) && cleanDate.split(' ').length > 3) {
+                                const d = new Date(cleanDate);
+                                if (!isNaN(d.getTime())) {
+                                    const pad = (n) => String(n).padStart(2, '0');
+                                    cleanDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                                }
+                            }
+                            
+                            const datePart = cleanDate.split(' ')[0];
+                            const parts = datePart.split(/[-/]/);
+                            
+                            let year, monthIdx;
+                            if (parts.length === 3) {
+                                if (parts[0].length === 4) {
+                                    year = parseInt(parts[0]);
+                                    monthIdx = parseInt(parts[1]) - 1;
+                                } else {
+                                    year = parseInt(parts[2]);
+                                    monthIdx = parseInt(parts[1]) - 1;
+                                }
+                                
+                                const key = `${monthNames[monthIdx]} ${year}`;
+                                if (!monthlySummary[key]) monthlySummary[key] = { count: 0, items: [] };
+                                monthlySummary[key].count++;
+                                
+                                // Format into friendly Thai representation: dd/MM/yyyy HH:mm:ss
+                                let formattedDate = cleanDate;
+                                try {
+                                    const dStr = cleanDate.split(' ')[0];
+                                    const tStr = cleanDate.split(' ')[1] || "";
+                                    const dParts = dStr.split('-');
+                                    if (dParts.length === 3) {
+                                        formattedDate = `${dParts[2]}/${dParts[1]}/${dParts[0]} ${tStr}`;
+                                    }
+                                } catch (e) {}
+
+                                item.formattedDate = formattedDate;
+                                monthlySummary[key].items.push(item);
+                            }
+                        } catch (e) {
+                            console.error("Parse history item date error:", e);
+                        }
+                    });
+
+                    const sortedMonths = Object.keys(monthlySummary).sort((a, b) => {
+                        const [mA, yA] = a.split(' ');
+                        const [mB, yB] = b.split(' ');
+                        if (yA !== yB) return parseInt(yB) - parseInt(yA);
+                        return monthNames.indexOf(mB) - monthNames.indexOf(mA);
+                    });
+
+                    // Store monthly summary globally for filtering
+                    window.currentMonthlySummary = monthlySummary;
+
+                    // Populate Dropdown Options
+                    const dropdown = document.getElementById('summaryMonthFilter');
+                    dropdown.innerHTML = sortedMonths.map(month => `
+                        <option value="${month}">${month}</option>
+                    `).join('');
+
+                    // Render selected month table (defaults to most recent)
+                    renderSummaryTable();
+                } else {
+                    document.getElementById('historyList').innerHTML = '<div class="no-history">ไม่พบประวัติการแก้ไขในระบบ</div>';
+                    document.getElementById('summaryMonthFilter').innerHTML = '<option value="">ไม่มีข้อมูล</option>';
+                }
+            } catch (e) {
+                console.error("Fetch history error:", e);
+                document.getElementById('historyList').innerHTML = '<div class="no-history">ไม่สามารถเชื่อมต่อประวัติได้</div>';
+            }
+        }
+
+        function renderSummaryTable() {
+            const dropdown = document.getElementById('summaryMonthFilter');
+            const selectedMonth = dropdown.value;
+            const container = document.getElementById('historyList');
+            
+            if (!selectedMonth || !window.currentMonthlySummary || !window.currentMonthlySummary[selectedMonth]) {
+                container.innerHTML = '<div class="no-history">ไม่พบประวัติการแก้ไขในระบบ</div>';
+                document.getElementById('usageCountBadge').innerText = "0";
+                return;
+            }
+
+            const monthData = window.currentMonthlySummary[selectedMonth];
+            document.getElementById('usageCountBadge').innerText = monthData.count;
+
+            container.innerHTML = `
+                <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <table style="width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; font-size: 13px;">
+                        <thead>
+                            <tr style="background: rgba(0, 123, 255, 0.15); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Part Name</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Model</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Brand</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary); text-align: center;">Usage</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary); text-align: center;">Stock</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Location</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Date Edited</th>
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary); text-align: center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${monthData.items.map(item => `
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); transition: background 0.2s;">
+                                    <td style="padding: 12px 16px; font-weight: 700; color: #fff;">${item.name}</td>
+                                    <td style="padding: 12px 16px; font-family: monospace; color: var(--text-dim);">${item.model}</td>
+                                    <td style="padding: 12px 16px; color: var(--text-dim);">${item.brand}</td>
+                                    <td style="padding: 12px 16px; text-align: center;">
+                                        <span class="stock-badge" style="background: rgba(255, 165, 0, 0.1); color: #ffa500; font-weight: bold; border: 1px solid rgba(255, 165, 0, 0.2);">${item.quantity}</span>
+                                    </td>
+                                    <td style="padding: 12px 16px; text-align: center;">
+                                        <span class="stock-badge" style="${item.stock <= 5 ? 'background: rgba(255, 71, 87, 0.1); color: #ff4757;' : ''}">${item.stock}</span>
+                                    </td>
+                                    <td style="padding: 12px 16px; color: #fff; font-weight: 500;">${item.location || "-"}</td>
+                                    <td style="padding: 12px 16px; font-family: monospace; color: var(--text-dim); font-size: 12px;">${item.formattedDate || item.date}</td>
+                                    <td style="padding: 12px 16px; text-align: center;">
+                                        <button class="btn-history" style="background: rgba(255, 71, 87, 0.1); border-color: #ff4757; color: #ff4757; padding: 4px 8px; font-size: 11px; margin: 0;" onmouseover="this.style.background='#ff4757'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 71, 87, 0.1)'; this.style.color='#ff4757';" onclick="deleteHistoryRecord(${item.rowNumber})">
+                                            ลบ
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        function openEditModal(name, model, stock, location, rowNumber) {
+            activeRowNumber = rowNumber;
+            activePartStock = stock;
+
+            document.getElementById('modalPartName').innerText = name;
+            document.getElementById('modalModel').innerText = model;
+            document.getElementById('modalStock').innerText = stock;
+            document.getElementById('modalUsage').value = 1;
+            document.getElementById('modalUsage').max = stock; // Limit maximum input to current stock
+            
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('modalDate').value = today;
+            document.getElementById('modalLocation').value = location || '';
+
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveUsage() {
+            const name = document.getElementById('modalPartName').innerText;
+            const usageQty = parseInt(document.getElementById('modalUsage').value) || 0;
+            const date = document.getElementById('modalDate').value;
+            const location = document.getElementById('modalLocation').value || 'ไม่ได้ระบุ';
+            
+            if (usageQty <= 0) {
+                alert("กรุณากรอกจำนวนที่เบิกให้ถูกต้อง");
+                return;
+            }
+
+            if (usageQty > activePartStock) {
+                alert(`ไม่สามารถเบิกได้เนื่องจากคงเหลือไม่เพียงพอ (คงเหลือ: ${activePartStock} ชิ้น)`);
+                return;
+            }
+
+            // Verify Password before updating
+            const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึกการเบิก (Password):");
+            if (password === null) return; // User cancelled
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
+                return;
+            }
+
+            const saveBtn = document.querySelector('.btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner" style="width: 14px; height: 14px; margin-right: 8px;"></span>กำลังบันทึก...';
+
+            try {
+                // 1. Submit POST request to update stock in Google Sheets
+                const formData = new URLSearchParams();
+                formData.append('action', 'useSparePart');
+                formData.append('rowNumber', activeRowNumber);
+                formData.append('quantity', usageQty);
+
+                await fetch(SPARE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                // 2. Decrement stock level in local memory and cache
+                const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
+                if (index !== -1) {
+                    spareParts[index].stock = Math.max(0, spareParts[index].stock - usageQty);
+                    
+                    // Set local edit timestamp matching Apps Script GMT+7 formatting (yyyy-MM-dd HH:mm:ss)
+                    const now = new Date();
+                    const pad = (n) => String(n).padStart(2, '0');
+                    const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                    
+                    spareParts[index].edit = timestamp;
+                    localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+                }
+
+                alert(`บันทึกการเบิก ${name}\nจำนวน: ${usageQty} ชิ้น\nเรียบร้อยแล้ว!`);
+                closeEditModal();
+                filterParts(); // Re-render the current list with updated stock levels
+
+            } catch (e) {
+                console.error("Save usage error:", e);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = originalText;
+            }
+        }
+
+        async function deleteHistoryRecord(rowNumber) {
+            const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบประวัติการเบิก (Password):");
+            if (password === null) return; // User cancelled
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
+                return;
+            }
+
+            if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการประวัติการเบิกนี้ออกจากระบบถาวร?")) {
+                return;
+            }
+
+            // Show temporary loading indicator in history list
+            document.getElementById('historyList').innerHTML = '<div class="no-history"><span class="loading-spinner" style="display:inline-block; vertical-align:middle; margin-right:8px;"></span> กำลังดำเนินการลบรายการประวัติ...</div>';
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'deleteHistory');
+                formData.append('rowNumber', rowNumber);
+
+                await fetch(SPARE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                alert("ลบประวัติสำเร็จ!");
+                // Reload clean history data in the modal
+                await openGlobalHistoryModal();
+            } catch (e) {
+                console.error("Delete history record error:", e);
+                alert("เกิดข้อผิดพลาดในการลบข้อมูล กรุณาลองใหม่อีกครั้ง");
+                await openGlobalHistoryModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const editModal = document.getElementById('editModal');
+            const historyModal = document.getElementById('historyModal');
+            if (event.target == editModal) closeEditModal();
+            if (event.target == historyModal) closeHistoryModal();
+        }
+
+        // Bind Search events
+        document.getElementById('searchInput').addEventListener('input', filterParts);
+        document.getElementById('searchType').addEventListener('change', filterParts);
+
+        // Initial Data Fetch
+        window.onload = function() {
+            fetchSpareParts();
+        };
+    </script>
+</body>
+</html>
