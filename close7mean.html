@@ -437,6 +437,15 @@
             return timeStr;
         }
 
+        function getBreakdownDateTime(record) {
+            if (!record.time) return "-";
+            const timeStr = String(record.time);
+            if (timeStr.includes('/')) {
+                return timeStr.startsWith("'") ? timeStr.slice(1) : timeStr;
+            }
+            return `${formatDMY(record.date)} ${formatTimeOnly(record.time)}`;
+        }
+
         let currentTab = 'sevenMean';
         let currentDept = 'All';
 
@@ -532,7 +541,7 @@
                         <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
                         <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
                         <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>วันที่ / เวลา</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
+                        <div class="card-item"><label>วันที่ / เวลา</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
                     </div>
                     
                     <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
@@ -560,7 +569,7 @@
                         <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
                         <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
                         <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>วันที่แจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
+                        <div class="card-item"><label>วันที่แจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
                     </div>
                     
                     <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
