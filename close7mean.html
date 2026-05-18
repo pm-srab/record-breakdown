@@ -86,16 +86,22 @@
 
         .card-header-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 12px;
             margin-bottom: 15px;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
+        @media (max-width: 900px) {
+            .card-header-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 columns on tablet */
+            }
+        }
+
         @media (max-width: 600px) {
             .card-header-grid {
-                grid-template-columns: 1fr 1fr; /* 2x2 grid on mobile/tablet */
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
             }
         }
 
@@ -446,6 +452,12 @@
             return `${formatDMY(record.date)} ${formatTimeOnly(record.time)}`;
         }
 
+        function getRecordDateTime(record) {
+            if (!record.date) return "-";
+            const str = String(record.date);
+            return str.startsWith("'") ? str.slice(1) : str;
+        }
+
         let currentTab = 'sevenMean';
         let currentDept = 'All';
 
@@ -541,7 +553,8 @@
                         <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
                         <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
                         <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>วันที่ / เวลา</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาแจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาลงบันทึก</label><span style="font-weight: 700; color: #5dade2; font-size: 14px;">${getRecordDateTime(record)}</span></div>
                     </div>
                     
                     <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
@@ -569,7 +582,8 @@
                         <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
                         <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
                         <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>วันที่แจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาแจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาลงบันทึก</label><span style="font-weight: 700; color: #5dade2; font-size: 14px;">${getRecordDateTime(record)}</span></div>
                     </div>
                     
                     <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
