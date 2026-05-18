@@ -443,13 +443,38 @@
             return timeStr;
         }
 
+        function extractDateOnly(dateStr) {
+            if (!dateStr) return "";
+            const str = String(dateStr).trim();
+            
+            // Match dd/MM/yyyy
+            const match = str.match(/^'?(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (match) {
+                return `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}/${match[3]}`;
+            }
+            
+            // ISO YYYY-MM-DD
+            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoMatch) {
+                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+            }
+            
+            return dateStr;
+        }
+
         function getBreakdownDateTime(record) {
             if (!record.time) return "-";
             const timeStr = String(record.time);
+            
+            // If it already contains a date (new entry)
             if (timeStr.includes('/')) {
                 return timeStr.startsWith("'") ? timeStr.slice(1) : timeStr;
             }
-            return `${formatDMY(record.date)} ${formatTimeOnly(record.time)}`;
+            
+            // Legacy fallback: combine date part and time part
+            const dOnly = extractDateOnly(record.date);
+            const tOnly = formatTimeOnly(record.time);
+            return `${dOnly} ${tOnly}`;
         }
 
         function getRecordDateTime(record) {
