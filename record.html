@@ -339,8 +339,21 @@
             <h2>บันทึกอาการเสีย</h2>
             <form id="pendingForm">
                 <div class="form-group">
-                    <label for="p_breakdownDate">วันที่แจ้งซ่อม:</label>
-                    <input type="date" id="p_breakdownDate" required>
+                    <label for="p_breakdownDate">วันที่แจ้งซ่อม (DATE):</label>
+                    <input type="date" id="p_breakdownDate" required style="
+                        width: 100%; 
+                        padding: 14px; 
+                        border-radius: 12px; 
+                        border: 2px solid #2c3e50; 
+                        background-color: #0d1a33; 
+                        color: #ffffff; 
+                        font-size: 16px; 
+                        outline: none;
+                        transition: all 0.3s ease;
+                        box-sizing: border-box;
+                        font-family: inherit;
+                        text-align: left;
+                    ">
                 </div>
 
                 <div class="form-group">
@@ -496,6 +509,11 @@
         
         setupTimeInput('p_breakdownTime');
 
+        // Set default date to today
+        const today = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        document.getElementById('p_breakdownDate').value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
         // Pending Form Submit Logic
         document.getElementById('pendingForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -513,10 +531,10 @@
             const factory = document.getElementById('p_factory').value.trim();
             const problem = document.getElementById('p_problem').value.trim();
 
-            const dateVal = document.getElementById('p_breakdownDate').value;
+            const selectedDateVal = document.getElementById('p_breakdownDate').value;
             let formattedDate = "";
-            if (dateVal) {
-                const parts = dateVal.split('-'); // ["2026", "05", "18"]
+            if (selectedDateVal) {
+                const parts = selectedDateVal.split('-');
                 if (parts.length === 3) {
                     const now = new Date();
                     const pad = (n) => String(n).padStart(2, '0');
@@ -524,7 +542,9 @@
                 }
             }
             if (!formattedDate) {
-                formattedDate = "'" + String(new Date().getDate()).padStart(2, '0') + '/' + String(new Date().getMonth() + 1).padStart(2, '0') + '/' + new Date().getFullYear() + ' ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0') + ':' + String(new Date().getSeconds()).padStart(2, '0');
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                formattedDate = `'${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
             }
 
             const breakdownEntry = {
@@ -572,16 +592,6 @@
                 submitBtn.innerHTML = originalBtnText;
             }
         };
-
-        // Set default date to today
-        document.addEventListener('DOMContentLoaded', () => {
-            const dateInput = document.getElementById('p_breakdownDate');
-            if (dateInput) {
-                const now = new Date();
-                const pad = (n) => String(n).padStart(2, '0');
-                dateInput.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-            }
-        });
     </script>
 </body>
 </html>
