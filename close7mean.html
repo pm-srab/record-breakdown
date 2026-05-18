@@ -84,6 +84,21 @@
             margin-bottom: 20px;
         }
 
+        .card-header-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        @media (max-width: 600px) {
+            .card-header-grid {
+                grid-template-columns: 1fr 1fr; /* 2x2 grid on mobile/tablet */
+            }
+        }
+
         @media (max-width: 480px) {
             .card-grid {
                 grid-template-columns: 1fr; /* 1 column on very small phones */
@@ -467,7 +482,7 @@
                         .map((row, originalIndex) => ({
                             date: row[0], line: row[1], machineId: row[2], caseCount: 1,
                             time: row[3], finishTime: row[4], duration: row[5], department: row[6],
-                            problem: row[7], solution: row[8], sparePart: row[9], sevenMean: row[10],
+                            factory: row[7], problem: row[8], solution: row[9], sparePart: row[10], sevenMean: row[11],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
                         .filter((r, idx) => {
@@ -513,12 +528,18 @@
 
             container.innerHTML = records.map(record => `
                 <div class="record-card" id="card-${record.id}">
-                    <div class="problem-section"><label>อาการเสีย (Problem)</label><p class="problem-text">${record.problem}</p></div>
-                    <div class="card-grid">
-                        <div class="card-item"><label>วันที่ / เวลา</label><span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
-                        <div class="card-item"><label>ไลน์ผลิต</label><span>${record.line}</span></div>
-                        <div class="card-item"><label>เครื่องจักร</label><span>${record.machineId}</span></div>
+                    <div class="card-header-grid">
+                        <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
+                        <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
+                        <div class="card-item"><label>วันที่ / เวลา</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
                     </div>
+                    
+                    <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
+                        <label style="display: block; font-size: 11px; color: #ffcc00; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">อาการเสีย (PROBLEM)</label>
+                        <p class="problem-text" style="font-size: 15px; margin: 0; color: #ffffff; font-weight: 500;">${record.problem || "-"}</p>
+                    </div>
+
                     <div class="input-group">
                         <input type="text" id="input-${record.id}" placeholder="กรอกรหัส 7 mean..." autocomplete="off">
                         <button onclick="updateSevenMean(${record.id}, this)">บันทึก</button>
@@ -535,11 +556,16 @@
 
             container.innerHTML = records.map(record => `
                 <div class="record-card" id="card-${record.id}">
-                    <div class="problem-section"><label>อาการเสีย (Problem)</label><p class="problem-text">${record.problem}</p></div>
-                    <div class="card-grid">
-                        <div class="card-item"><label>วันที่แจ้ง</label><span>${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
-                        <div class="card-item"><label>ไลน์ผลิต</label><span>${record.line}</span></div>
-                        <div class="card-item"><label>เครื่องจักร</label><span>${record.machineId}</span></div>
+                    <div class="card-header-grid">
+                        <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
+                        <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
+                        <div class="card-item"><label>วันที่แจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${formatDMY(record.date)} ${formatTimeOnly(record.time)}</span></div>
+                    </div>
+                    
+                    <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
+                        <label style="display: block; font-size: 11px; color: #ffcc00; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">อาการเสีย (PROBLEM)</label>
+                        <p class="problem-text" style="font-size: 15px; margin: 0; color: #ffffff; font-weight: 500;">${record.problem || "-"}</p>
                     </div>
                     
                     <div class="closing-form">

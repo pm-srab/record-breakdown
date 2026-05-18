@@ -383,6 +383,31 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="p_factory">โรงงาน (Factory):</label>
+                    <select id="p_factory" required style="
+                        width: 100%; 
+                        padding: 14px; 
+                        padding-right: 40px;
+                        border-radius: 12px; 
+                        border: 2px solid #2c3e50; 
+                        background-color: #0d1a33; 
+                        color: #ffffff; 
+                        font-size: 16px; 
+                        appearance: none;
+                        -webkit-appearance: none;
+                        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
+                        background-repeat: no-repeat;
+                        background-position: right 15px center;
+                        background-size: 18px;
+                        transition: all 0.3s ease;">
+                        <option value="" disabled selected>เลือกโรงงาน</option>
+                        <option value="โรง1">โรง1</option>
+                        <option value="โรง2">โรง2</option>
+                        <option value="โรง3">โรง3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="p_problem">อาการเสีย <span class="requirement">(ขั้นต่ำ 20 ตัวอักษร)</span>:</label>
                     <textarea id="p_problem" placeholder="ระบุอาการเสีย (อย่างน้อย 20 ตัวอักษร)" rows="3" required minlength="20"></textarea>
                     <div id="p_problemCount" style="font-size: 11px; text-align: right; color: #888; margin-top: 5px;">0 / 20</div>
@@ -480,6 +505,7 @@
             const line = "Line " + document.getElementById('p_productionLine').value.trim();
             const machineId = document.getElementById('p_machineId').value.trim();
             const department = document.getElementById('p_department').value.trim();
+            const factory = document.getElementById('p_factory').value.trim();
             const problem = document.getElementById('p_problem').value.trim();
 
             const breakdownEntry = {
@@ -488,6 +514,7 @@
                 line: line,
                 machineId: machineId,
                 department: department,
+                factory: factory,
                 problem: problem,
                 solution: "-",
                 sparePart: "-",

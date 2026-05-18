@@ -550,6 +550,11 @@
             box-shadow: 0 4px 12px rgba(162, 155, 254, 0.4);
         }
 
+        .group-btn.other.active {
+            background-color: #ffa502;
+            box-shadow: 0 4px 12px rgba(255, 165, 2, 0.4);
+        }
+
         /* Compact Toggles in Cards */
         .card-header-flex {
             display: flex;
@@ -1134,6 +1139,15 @@
                 </div>
             </div>
 
+            <div class="charts-container" style="grid-template-columns: 1fr;">
+                <div class="chart-card">
+                    <h3>Total Breakdown Time (Hours)</h3>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="breakdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <div class="charts-container">
                 <div class="chart-card">
                     <div class="card-header-flex">
@@ -1141,13 +1155,18 @@
                         <div class="group-toggle-container compact-toggle" id="mttrToggle">
                             <button class="group-btn press active" onclick="switchMttrGroup('Press', this)">Press</button>
                             <button class="group-btn robot" onclick="switchMttrGroup('Robot', this)">Robot</button>
+                            <button class="group-btn other" onclick="switchMttrGroup('Other', this)">Other</button>
                         </div>
                     </div>
                     <div style="position: relative; height: 250px; width: 100%;">
                         <canvas id="mttrChart"></canvas>
                     </div>
-                    <div style="text-align: center; margin-top: 10px;">
+                    <div style="text-align: center; margin-top: 10px; display: flex; justify-content: center; gap: 8px;">
                         <button onclick="showMath('MTTR')" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">รายละเอียดการคำนวณ</button>
+                        <button onclick="showAnalysisPareto('MTTR')" style="background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                            View Pareto
+                        </button>
                     </div>
                 </div>
                 <div class="chart-card">
@@ -1158,13 +1177,18 @@
                         <div class="group-toggle-container compact-toggle" id="mtbfToggle">
                             <button class="group-btn press active" onclick="switchMtbfGroup('Press', this)">Press</button>
                             <button class="group-btn robot" onclick="switchMtbfGroup('Robot', this)">Robot</button>
+                            <button class="group-btn other" onclick="switchMtbfGroup('Other', this)">Other</button>
                         </div>
                     </div>
                     <div style="position: relative; height: 250px; width: 100%;">
                         <canvas id="mtbfChart"></canvas>
                     </div>
-                    <div style="text-align: center; margin-top: 10px;">
+                    <div style="text-align: center; margin-top: 10px; display: flex; justify-content: center; gap: 8px;">
                         <button onclick="showMath('MTBF')" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">รายละเอียดการคำนวณ</button>
+                        <button onclick="showAnalysisPareto('MTBF')" style="background: rgba(0, 123, 255, 0.1); color: #007bff; border: 1px solid rgba(0, 123, 255, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                            View Pareto
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1196,6 +1220,7 @@
                             <th>เวลาเสร็จ</th>
                             <th>รวมเวลา</th>
                             <th>หน่วยงาน</th>
+                            <th>โรงงาน</th>
                             <th>อาการ</th>
                             <th>วิธีแก้ไข</th>
                             <th>อะไหล่</th>
@@ -1262,7 +1287,7 @@
                         <div class="frequency-col">
                             <div class="col-header">
                                 <div class="dot low"></div>
-                                <h3 style="color: #2ed573;">Low Risk (0-1)</h3>
+                                <h3 style="color: #2ed573;">Low Risk (1)</h3>
                             </div>
                             <div id="lowRiskList" class="machine-list">
                                 <!-- Data -->
@@ -1446,10 +1471,11 @@
                             finishTime: row[4],
                             duration: row[5],
                             department: row[6],
-                            problem: row[7],
-                            solution: row[8],
-                            sparePart: row[9],
-                            sevenMean: row[10],
+                            factory: row[7],
+                            problem: row[8],
+                            solution: row[9],
+                            sparePart: row[10],
+                            sevenMean: row[11],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
                         .filter((r, idx) => {
@@ -1520,6 +1546,7 @@
                     <td>${formatTimeOnly(record.finishTime)}</td>
                     <td class="col-duration"><span class="badge-time">${durationMinutes}</span></td>
                     <td>${record.department}</td>
+                    <td>${record.factory || '-'}</td>
                     <td class="col-problem">${record.problem}</td>
                     <td class="col-solution">${record.solution}</td>
                     <td>${record.sparePart || '-'}</td>
@@ -1621,8 +1648,16 @@
         let paretoChartInstance = null;
         let mttrChartInstance = null;
         let mtbfChartInstance = null;
+        let breakdownChartInstance = null;
         let currentMttrGroup = 'Press';
         let currentMtbfGroup = 'Press';
+
+        const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        const groupPrefixes = {
+            'Press': ['BP', 'SP', 'PT', 'DF'],
+            'Robot': ['RB'],
+            'Other': []
+        };
 
         function switchMttrGroup(group, el) {
             currentMttrGroup = group;
@@ -1926,13 +1961,144 @@
                 }
             });
 
-            // --- MTTR & MTBF Calculation ---
-            const groupPrefixes = {
-                'Press': ['BP', 'SP', 'PT', 'DF'],
-                'Robot': ['RB']
+            // --- Breakdown Time Calculation ---
+            const calculateBreakdownTotal = () => {
+                const monthlyHours = {};
+                data.forEach(r => {
+                    if (r.date) {
+                        const fullDate = formatDMY(r.date).split(' ')[0];
+                        if (fullDate !== "-") {
+                            const parts = fullDate.split('/');
+                            if (parts.length === 3) {
+                                const monthIdx = parseInt(parts[1]) - 1;
+                                const monthYear = `${monthNames[monthIdx]} ${parts[2]}`;
+                                if (!monthlyHours[monthYear]) monthlyHours[monthYear] = 0;
+
+                                let durationMinutes = 0;
+                                if (r.duration) {
+                                    const str = String(r.duration).toLowerCase().trim();
+                                    const hrMatch = str.match(/(\d+(\.\d+)?)\s*(ชม|hr|h)/);
+                                    const minMatch = str.match(/(\d+(\.\d+)?)\s*(นาที|min|m)/);
+                                    if (hrMatch || minMatch) {
+                                        durationMinutes = ((hrMatch ? parseFloat(hrMatch[1]) : 0) * 60) + (minMatch ? parseFloat(minMatch[1]) : 0);
+                                    } else {
+                                        const plainNum = parseFloat(str.replace(/,/g, ''));
+                                        if (!isNaN(plainNum)) durationMinutes = plainNum;
+                                    }
+                                }
+                                monthlyHours[monthYear] += durationMinutes;
+                            }
+                        }
+                    }
+                });
+
+                const sortedMonths = Object.keys(monthlyHours).sort((a, b) => {
+                    const [mA, yA] = a.split(' ');
+                    const [mB, yB] = b.split(' ');
+                    if (yA !== yB) return parseInt(yA) - parseInt(yB);
+                    return monthNames.indexOf(mA) - monthNames.indexOf(mB);
+                });
+
+                const hoursData = sortedMonths.map(m => (monthlyHours[m] / 60).toFixed(2));
+                return { labels: sortedMonths, data: hoursData };
             };
+
+            // Breakdown Time Chart Rendering
+            if (!updateOnly || updateOnly === 'breakdown') {
+                const bdRes = calculateBreakdownTotal();
+                const ctxBd = document.getElementById('breakdownChart').getContext('2d');
+                if (breakdownChartInstance) breakdownChartInstance.destroy();
+                
+                const targetData = bdRes.labels.map(() => 60);
+
+                breakdownChartInstance = new Chart(ctxBd, {
+                    type: 'bar',
+                    plugins: [ChartDataLabels, {
+                        id: 'targetLine',
+                        afterDraw: (chart) => {
+                            const { ctx, scales: { x, y } } = chart;
+                            const yVal = y.getPixelForValue(60);
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.strokeStyle = '#ff4757';
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([6, 6]);
+                            ctx.moveTo(x.left, yVal);
+                            ctx.lineTo(x.right, yVal);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }],
+                    data: {
+                        labels: bdRes.labels,
+                        datasets: [
+                            {
+                                label: 'Total Breakdown (Hrs)',
+                                data: bdRes.data,
+                                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                                borderColor: '#3498db',
+                                borderWidth: 1,
+                                borderRadius: 8,
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                max: 80,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: 'rgba(255,255,255,0.7)' },
+                                title: { display: true, text: 'Hours', color: 'rgba(255,255,255,0.7)' }
+                            },
+                            x: { 
+                                grid: { display: false },
+                                ticks: { color: 'rgba(255,255,255,0.7)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                labels: { 
+                                    color: 'rgba(255,255,255,0.7)',
+                                    generateLabels: (chart) => {
+                                        const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                        original.push({
+                                            text: 'Target (60 Hrs)',
+                                            strokeStyle: '#ff4757',
+                                            lineWidth: 2,
+                                            lineDash: [6, 6],
+                                            fillStyle: 'transparent',
+                                            hidden: false,
+                                            datasetIndex: 999
+                                        });
+                                        return original;
+                                    }
+                                } 
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y + ' hrs';
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                color: '#fff',
+                                font: { weight: 'bold', size: 10 },
+                                formatter: (val) => val
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- MTTR & MTBF Calculation ---
             const operationalMinsPerMonth = 15.8 * 22 * 60;
-            const monthNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
             // Shared logic for calculating MTTR/MTBF for a specific group
             const calculateStats = (targetGroup) => {
@@ -1946,6 +2112,11 @@
                     // Filter machines that belong to this group
                     const matchingMachines = machineIds.filter(mIdRaw => {
                         const mId = mIdRaw.toUpperCase();
+                        if (targetGroup === 'Other') {
+                            const isPress = groupPrefixes['Press'].some(p => mId.startsWith(p));
+                            const isRobot = groupPrefixes['Robot'].some(p => mId.startsWith(p));
+                            return !isPress && !isRobot && mId !== "";
+                        }
                         return prefixes.some(p => mId.startsWith(p));
                     });
 
@@ -2012,7 +2183,10 @@
                     return monthNames.indexOf(mA) - monthNames.indexOf(mB);
                 });
 
-                const totalMachineCount = targetGroup === 'Press' ? 78 : 157;
+                let totalMachineCount = 0;
+                if (targetGroup === 'Press') totalMachineCount = 78;
+                else if (targetGroup === 'Robot') totalMachineCount = 157;
+                else if (targetGroup === 'Other') totalMachineCount = 660;
                 const mttr = sortedMonths.map(m => (monthlyData[m].totalDuration / monthlyData[m].count).toFixed(2));
                 
                 const mtbf = sortedMonths.map(m => {
@@ -2076,8 +2250,8 @@
                         datasets: [{
                             label: 'MTTR (นาที)',
                             data: mttrRes.mttr,
-                            backgroundColor: currentMttrGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : 'rgba(40, 167, 69, 0.7)',
-                            borderColor: currentMttrGroup === 'Robot' ? '#a29bfe' : '#28a745',
+                            backgroundColor: currentMttrGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : (currentMttrGroup === 'Other' ? 'rgba(255, 165, 2, 0.7)' : 'rgba(40, 167, 69, 0.7)'),
+                            borderColor: currentMttrGroup === 'Robot' ? '#a29bfe' : (currentMttrGroup === 'Other' ? '#ffa502' : '#28a745'),
                             borderWidth: 1,
                             borderRadius: 8
                         }]
@@ -2117,8 +2291,8 @@
                         datasets: [{
                             label: 'MTBF (ชม.)',
                             data: mtbfRes.mtbf,
-                            backgroundColor: currentMtbfGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : 'rgba(40, 167, 69, 0.7)',
-                            borderColor: currentMtbfGroup === 'Robot' ? '#a29bfe' : '#28a745',
+                            backgroundColor: currentMtbfGroup === 'Robot' ? 'rgba(162, 155, 254, 0.7)' : (currentMtbfGroup === 'Other' ? 'rgba(255, 165, 2, 0.7)' : 'rgba(40, 167, 69, 0.7)'),
+                            borderColor: currentMtbfGroup === 'Robot' ? '#a29bfe' : (currentMtbfGroup === 'Other' ? '#ffa502' : '#28a745'),
                             borderWidth: 1,
                             borderRadius: 8
                         }]
@@ -2157,10 +2331,18 @@
             const content = document.getElementById('mathContent');
             const title = document.getElementById('mathTitle');
 
+            const groupInfo = {
+                'Press': 'BP, SP, PT, DF',
+                'Robot': 'RB',
+                'Other': 'เครื่องจักรอื่นๆ ที่ไม่ใช่ Press และ Robot'
+            };
+            const groupDesc = groupInfo[details.targetGroup] || details.targetGroup;
+
             title.textContent = `รายละเอียดการคำนวณ ${type} (${details.targetGroup})`;
 
             if (type === 'MTTR') {
                 content.innerHTML = `
+                    <div class="math-row"><span>กลุ่มเครื่องจักร:</span> <span style="color:#007BFF; font-weight:bold;">${groupDesc}</span></div>
                     <div class="math-row"><span>รวมเวลา Downtime:</span> <span>${details.totalDuration.toLocaleString()} นาที</span></div>
                     <div class="math-row"><span>จำนวนครั้งที่เสีย (Case):</span> <span>${details.totalCases.toLocaleString()} ครั้ง</span></div>
                     <div class="math-formula">
@@ -2172,6 +2354,7 @@
             } else {
                 const perfectCount = details.totalMachines - details.uniqueBroken;
                 content.innerHTML = `
+                    <div class="math-row"><span>กลุ่มเครื่องจักร:</span> <span style="color:#007BFF; font-weight:bold;">${groupDesc}</span></div>
                     <div class="math-row"><span>เวลาที่ต้องการทำงาน (ต่อเครื่อง):</span> <span>${details.operationalMins.toLocaleString()} นาที</span></div>
                     <div class="math-row"><span>จำนวนเครื่องจักรทั้งหมด:</span> <span>${details.totalMachines} เครื่อง</span></div>
                     <div class="math-row"><span>เครื่องที่เสียจริง:</span> <span>${details.uniqueBroken} เครื่อง</span></div>
@@ -2369,10 +2552,118 @@
             document.getElementById('compareList2').innerHTML = renderCompareList(freq2, m2);
         }
 
+        let analysisParetoInstance = null;
+
+        function showAnalysisPareto(type) {
+            const group = type === 'MTTR' ? currentMttrGroup : currentMtbfGroup;
+            const data = JSON.parse(localStorage.getItem("breakdowns") || "[]");
+            const prefixes = groupPrefixes[group];
+
+            const filteredData = data.filter(r => {
+                const mId = String(r.machineId || "").toUpperCase();
+                if (group === 'Other') {
+                    const isPress = groupPrefixes['Press'].some(p => mId.startsWith(p));
+                    const isRobot = groupPrefixes['Robot'].some(p => mId.startsWith(p));
+                    return !isPress && !isRobot && mId !== "";
+                }
+                return prefixes.some(p => mId.startsWith(p));
+            });
+
+            const counts = {};
+            let totalVal = 0;
+
+            filteredData.forEach(r => {
+                let val = 0;
+                if (r.duration) {
+                    const str = String(r.duration).toLowerCase();
+                    const hrMatch = str.match(/(\d+(\.\d+)?)\s*(ชม|hr|h)/);
+                    const minMatch = str.match(/(\d+(\.\d+)?)\s*(นาที|min|m)/);
+                    val = ((hrMatch ? parseFloat(hrMatch[1]) : 0) * 60) + (minMatch ? parseFloat(minMatch[1]) : 0);
+                    if (!val) val = parseFloat(str.replace(/,/g, '')) || 0;
+                }
+
+                const key = type === 'MTTR' ? (r.problem || 'Other') : (r.machineId || 'Unknown');
+                counts[key] = (counts[key] || 0) + val;
+                totalVal += val;
+            });
+
+            const sorted = Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            if (sorted.length === 0) {
+                alert("ไม่มีข้อมูลสำหรับกลุ่มนี้");
+                return;
+            }
+
+            const labels = sorted.map(i => i[0]);
+            const values = sorted.map(i => i[1]);
+            let sum = 0;
+            const cumulative = values.map(v => {
+                sum += v;
+                return (sum / totalVal) * 100;
+            });
+
+            document.getElementById('paretoModal').style.display = 'block';
+            document.getElementById('mathOverlay').style.display = 'block';
+            document.getElementById('paretoModalTitle').textContent = type === 'MTTR' ? `Pareto: ปัญหาที่ทำให้เสียเวลานานที่สุด (${group})` : `Pareto: เครื่องจักรที่เสียเวลารวมสูงสุด (${group})`;
+
+            const ctx = document.getElementById('analysisParetoChart').getContext('2d');
+            if (analysisParetoInstance) analysisParetoInstance.destroy();
+
+            analysisParetoInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Cumulative %',
+                            data: cumulative,
+                            borderColor: '#ffcc00',
+                            backgroundColor: '#ffcc00',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y1',
+                            order: 1
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Total Downtime (Mins)',
+                            data: values,
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: '#3498db',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y',
+                            order: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left', beginAtZero: true, title: { display: true, text: 'Minutes', color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.7)' } },
+                        y1: { position: 'right', min: 0, max: 100, title: { display: true, text: '%', color: 'rgba(255,255,255,0.5)' }, grid: { drawOnChartArea: false }, ticks: { color: 'rgba(255,255,255,0.7)' } },
+                        x: { ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 10 } }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'rgba(255,255,255,0.7)' } }
+                    }
+                }
+            });
+        }
+
+        function closePareto() {
+            document.getElementById('paretoModal').style.display = 'none';
+            document.getElementById('mathOverlay').style.display = 'none';
+        }
+
         window.onload = loadRecords;
     </script>
     <!-- Math Detail Modal -->
-    <div class="math-overlay" id="mathOverlay" onclick="closeMath()"></div>
+    <div class="math-overlay" id="mathOverlay" onclick="closeMath(); closePareto(); closeDetail();"></div>
     <div class="math-modal" id="mathModal">
         <div class="math-modal-header">
             <h3 id="mathTitle" style="margin:0">รายละเอียดการคำนวณ</h3>
@@ -2380,6 +2671,18 @@
         </div>
         <div id="mathContent"></div>
         <button onclick="closeMath()" style="width:100%; margin-top:20px; padding:12px; background:#4cd137; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer;">ปิด</button>
+    </div>
+
+    <!-- Pareto Modal -->
+    <div id="paretoModal" class="math-modal" style="max-width: 800px; width: 95%;">
+        <div class="math-modal-header">
+            <h3 id="paretoModalTitle" style="margin:0">Pareto Analysis</h3>
+            <button onclick="closePareto()" style="background:none; border:none; color:#888; cursor:pointer; font-size:24px;">&times;</button>
+        </div>
+        <div style="height: 400px; width: 100%; margin-top: 20px;">
+            <canvas id="analysisParetoChart"></canvas>
+        </div>
+        <button onclick="closePareto()" style="width:100%; margin-top:20px; padding:12px; background:#3498db; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer;">ปิด</button>
     </div>
     <!-- Detail Modal -->
     <div class="detail-modal" id="detailModal">
