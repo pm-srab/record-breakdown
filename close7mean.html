@@ -4,16 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ปิดรหัส 7 mean - Maintenance Records</title>
+    <script src="theme.js?v=2"></script>
     <style>
+        :root {
+            --bg: #1a1a1a;
+            --card-bg: #1f3050;
+            --text-main: #ffffff;
+            --text-dim: #bbbbbb;
+            --border: rgba(255, 255, 255, 0.1);
+            --input-bg: #0d1a33;
+            --input-border: #2c3e50;
+            --problem-bg: rgba(255, 255, 255, 0.03);
+            --problem-label: #ffcc00;
+            --problem-text: #ffffff;
+            --machine-color: #00ffcc;
+            --time-color: #ff9f43;
+            --time-rec-color: #5dade2;
+            --closing-form-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1c1e21;
+            --text-dim: #555555;
+            --border: rgba(0, 0, 0, 0.1);
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --problem-bg: rgba(0, 0, 0, 0.03);
+            --problem-label: #d97706; /* Darker orange/amber for contrast */
+            --problem-text: #1c1e21;
+            --machine-color: #0d9488; /* Dark teal for high contrast */
+            --time-color: #ea580c; /* High contrast orange */
+            --time-rec-color: #0284c7; /* High contrast blue */
+            --closing-form-bg: rgba(0, 0, 0, 0.03);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
+            background-color: var(--bg);
             margin: 0;
             min-height: 100vh;
-            color: #ffffff;
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             padding: 40px 0;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* Main Content Styles */
@@ -29,7 +65,7 @@
             align-items: center;
             margin-bottom: 40px;
             padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border);
         }
 
         h1 {
@@ -43,9 +79,9 @@
         }
 
         .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
             padding: 10px 20px;
             border-radius: 12px;
             text-decoration: none;
@@ -57,19 +93,22 @@
         }
 
         .btn-back:hover {
-            background-color: rgba(255,255,255,0.05);
-            color: #fff;
+            background-color: var(--border);
+            color: var(--text-main);
             border-color: #007BFF;
         }
 
         .record-card {
-            background-color: #1f3050;
+            background-color: var(--card-bg);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             border-left: 5px solid #007BFF;
+            border: 1px solid var(--border);
+            border-left: 5px solid #007BFF;
             animation: fadeIn 0.4s ease;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         @keyframes fadeIn {
@@ -90,7 +129,7 @@
             gap: 12px;
             margin-bottom: 15px;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--border);
         }
 
         @media (max-width: 900px) {
@@ -120,7 +159,7 @@
 
         .card-item span {
             font-weight: 600;
-            color: #fff;
+            color: var(--text-main);
         }
 
         .input-group {
@@ -133,9 +172,9 @@
 
         .input-group input {
             flex: 1;
-            background-color: #0d1a33;
-            border: 1px solid #2c3e50;
-            color: white;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
             padding: 10px;
             border-radius: 8px;
             font-size: 14px;
@@ -185,7 +224,7 @@
         }
 
         .problem-section {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: var(--problem-bg);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
@@ -194,7 +233,7 @@
         .problem-section label {
             display: block;
             font-size: 13px;
-            color: #ffcc00;
+            color: var(--problem-label);
             margin-bottom: 8px;
             font-weight: bold;
             text-transform: uppercase;
@@ -203,20 +242,42 @@
 
         .problem-text {
             margin: 0;
-            color: #ffffff;
+            color: var(--problem-text);
             font-size: 17px;
             font-weight: 600;
             line-height: 1.5;
         }
 
+        /* High-contrast sub-badge classes */
+        .machine-badge {
+            font-weight: 700;
+            color: var(--machine-color);
+            font-size: 16px;
+        }
+        .info-text {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+        .time-text {
+            font-weight: 700;
+            color: var(--time-color);
+            font-size: 14px;
+        }
+        .time-rec-text {
+            font-weight: 700;
+            color: var(--time-rec-color);
+            font-size: 14px;
+        }
+
         /* Control Center Styles */
         .control-center {
             display: flex;
-            background-color: rgba(255,255,255,0.05);
+            background-color: var(--card-bg);
             padding: 6px;
             border-radius: 14px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
         }
 
         .control-btn {
@@ -224,7 +285,7 @@
             padding: 14px;
             border: none;
             background: transparent;
-            color: #777;
+            color: var(--text-dim);
             font-weight: bold;
             cursor: pointer;
             border-radius: 10px;
@@ -240,7 +301,7 @@
 
         /* Closing Form Styles */
         .closing-form {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: var(--closing-form-bg);
             padding: 20px;
             border-radius: 12px;
             margin-top: 15px;
@@ -292,9 +353,9 @@
         /* Improved Form Field Styles */
         .form-field input, .form-field textarea {
             width: 100%;
-            background-color: #0d1a33;
-            border: 2px solid #2c3e50;
-            color: white;
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
+            color: var(--text-main);
             padding: 12px 15px;
             border-radius: 10px;
             font-size: 14px;
@@ -319,9 +380,9 @@
         }
 
         .dept-btn {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #aaa;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 13px;
@@ -331,8 +392,8 @@
         }
 
         .dept-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
+            background-color: var(--border);
+            color: var(--text-main);
         }
 
         .dept-btn.active {
@@ -575,16 +636,16 @@
             container.innerHTML = records.map(record => `
                 <div class="record-card" id="card-${record.id}">
                     <div class="card-header-grid">
-                        <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
-                        <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
-                        <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>เวลาแจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
-                        <div class="card-item"><label>เวลาลงบันทึก</label><span style="font-weight: 700; color: #5dade2; font-size: 14px;">${getRecordDateTime(record)}</span></div>
+                        <div class="card-item"><label>เครื่องจักร</label><span class="machine-badge">${record.machineId}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span class="info-text">${record.line}</span></div>
+                        <div class="card-item"><label>โรงงาน</label><span class="info-text">${record.factory || "-"}</span></div>
+                        <div class="card-item"><label>เวลาแจ้ง</label><span class="time-text">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาลงบันทึก</label><span class="time-rec-text">${getRecordDateTime(record)}</span></div>
                     </div>
                     
-                    <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
-                        <label style="display: block; font-size: 11px; color: #ffcc00; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">อาการเสีย (PROBLEM)</label>
-                        <p class="problem-text" style="font-size: 15px; margin: 0; color: #ffffff; font-weight: 500;">${record.problem || "-"}</p>
+                    <div class="problem-section">
+                        <label>อาการเสีย (PROBLEM)</label>
+                        <p class="problem-text">${record.problem || "-"}</p>
                     </div>
 
                     <div class="input-group">
@@ -604,16 +665,16 @@
             container.innerHTML = records.map(record => `
                 <div class="record-card" id="card-${record.id}">
                     <div class="card-header-grid">
-                        <div class="card-item"><label>เครื่องจักร</label><span style="font-weight: 700; color: #00ffcc; font-size: 16px;">${record.machineId}</span></div>
-                        <div class="card-item"><label>ไลน์ผลิต</label><span style="font-weight: 700; color: #fff; font-size: 15px;">${record.line}</span></div>
-                        <div class="card-item"><label>โรงงาน</label><span style="font-weight: 700; color: #aaa; font-size: 15px;">${record.factory || "-"}</span></div>
-                        <div class="card-item"><label>เวลาแจ้ง</label><span style="font-weight: 700; color: #ff9f43; font-size: 14px;">${getBreakdownDateTime(record)}</span></div>
-                        <div class="card-item"><label>เวลาลงบันทึก</label><span style="font-weight: 700; color: #5dade2; font-size: 14px;">${getRecordDateTime(record)}</span></div>
+                        <div class="card-item"><label>เครื่องจักร</label><span class="machine-badge">${record.machineId}</span></div>
+                        <div class="card-item"><label>ไลน์ผลิต</label><span class="info-text">${record.line}</span></div>
+                        <div class="card-item"><label>โรงงาน</label><span class="info-text">${record.factory || "-"}</span></div>
+                        <div class="card-item"><label>เวลาแจ้ง</label><span class="time-text">${getBreakdownDateTime(record)}</span></div>
+                        <div class="card-item"><label>เวลาลงบันทึก</label><span class="time-rec-text">${getRecordDateTime(record)}</span></div>
                     </div>
                     
-                    <div class="problem-section" style="margin: 0 0 20px 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
-                        <label style="display: block; font-size: 11px; color: #ffcc00; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">อาการเสีย (PROBLEM)</label>
-                        <p class="problem-text" style="font-size: 15px; margin: 0; color: #ffffff; font-weight: 500;">${record.problem || "-"}</p>
+                    <div class="problem-section">
+                        <label>อาการเสีย (PROBLEM)</label>
+                        <p class="problem-text">${record.problem || "-"}</p>
                     </div>
                     
                     <div class="closing-form">

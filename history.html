@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maintenance History - SRAB</title>
+    <script src="theme.js?v=2"></script>
     <style>
         :root {
             --primary: #007BFF;
@@ -13,6 +14,14 @@
             --text-main: #ffffff;
             --text-dim: rgba(255, 255, 255, 0.6);
             --border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1c1e21;
+            --text-dim: rgba(0, 0, 0, 0.6);
+            --border: rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -29,6 +38,7 @@
             display: flex;
             justify-content: center;
             padding: 40px 0;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -150,8 +160,8 @@
         .record-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 12px 16px;
             transition: transform 0.2s ease;
         }
 
@@ -159,72 +169,130 @@
             transform: scale(0.98);
         }
 
-        .card-header {
+        /* ── Compact single-line info row ── */
+        .card-info-row {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 12px;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
         }
 
         .machine-id {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 800;
             color: var(--primary);
+            white-space: nowrap;
         }
 
-        .record-date {
-            font-size: 12px;
+        .info-chip {
+            font-size: 11px;
             color: var(--text-dim);
+            white-space: nowrap;
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .info-item label {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-
-        .info-item span {
-            font-size: 14px;
+        .info-chip strong {
+            color: var(--text-main);
             font-weight: 600;
         }
 
-        .problem-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
+        .dot-sep {
+            width: 3px;
+            height: 3px;
+            background: var(--border);
+            border-radius: 50%;
+            flex-shrink: 0;
         }
 
-        .problem-box label {
-            display: block;
+        .record-date {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        /* ── อาการเสีย row ── */
+        .problem-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(255,71,87,0.07);
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+
+        .problem-label {
             font-size: 10px;
-            color: #ff4757;
-            margin-bottom: 5px;
             font-weight: 700;
+            color: #ff4757;
             text-transform: uppercase;
+            white-space: nowrap;
+            margin-top: 2px;
         }
 
         .problem-text {
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        /* ── Expand button ── */
+        .btn-expand {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-expand:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-expand svg {
+            transition: transform 0.3s;
+        }
+
+        .btn-expand.open svg {
+            transform: rotate(180deg);
+        }
+
+        /* ── Expandable detail section ── */
+        .card-detail {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.35s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .card-detail.open {
+            max-height: 400px;
+            opacity: 1;
+        }
+
+        .detail-inner {
+            padding-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .solution-box {
             background: rgba(40, 167, 69, 0.05);
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
             border-left: 3px solid #28a745;
         }
 
@@ -232,9 +300,13 @@
             display: block;
             font-size: 10px;
             color: #28a745;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: 700;
             text-transform: uppercase;
+        }
+
+        .solution-box .problem-text {
+            font-size: 13px;
         }
 
         .spare-badge {
@@ -244,7 +316,6 @@
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 11px;
-            margin-top: 10px;
             border: 1px solid rgba(162, 155, 254, 0.2);
         }
 
@@ -411,49 +482,47 @@
                 return;
             }
 
-            list.innerHTML = displayList.map(r => `
+            list.innerHTML = displayList.map((r, i) => {
+                const hasExtra = (r.solution && r.solution !== '-') || (r.sparePart && r.sparePart !== '-');
+                return `
                 <div class="record-card">
-                    <div class="card-header">
+                    <!-- One-line compact info row -->
+                    <div class="card-info-row">
                         <div class="machine-id">${r.machineId}</div>
+                        <div class="dot-sep"></div>
+                        <div class="info-chip">L: <strong>${r.line || '-'}</strong></div>
+                        <div class="dot-sep"></div>
+                        <div class="info-chip"><strong>${formatTimeOnly(r.time)}</strong>–<strong>${formatTimeOnly(r.finishTime)}</strong></div>
+                        <div class="dot-sep"></div>
+                        <div class="info-chip"><strong>${r.department || '-'}</strong></div>
+                        ${r.duration ? `<div class="dot-sep"></div><div class="info-chip">⏱ <strong>${r.duration}</strong></div>` : ''}
                         <div class="record-date">${formatDMY(r.date)}</div>
                     </div>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <label>Line</label>
-                            <span>${r.line}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Time</label>
-                            <span>${formatTimeOnly(r.time)} - ${formatTimeOnly(r.finishTime)}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Department</label>
-                            <span>${r.department}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Factory</label>
-                            <span>${r.factory || '-'}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Duration</label>
-                            <span>${r.duration || '-'}</span>
-                        </div>
+
+                    <!-- อาการเสีย row -->
+                    <div class="problem-row">
+                        <span class="problem-label">อาการเสีย</span>
+                        <div class="problem-text">${r.problem || '-'}</div>
                     </div>
 
-                    <div class="problem-box">
-                        <label>อาการเสีย (Problem)</label>
-                        <div class="problem-text">${r.problem}</div>
-                    </div>
-
-                    <div class="solution-box">
-                        <label>วิธีแก้ไข (Solution)</label>
-                        <div class="problem-text">${r.solution || '-'}</div>
-                    </div>
-
-                    ${r.sparePart && r.sparePart !== '-' ? `<div class="spare-badge">🔧 ${r.sparePart}</div>` : ''}
+                    <!-- Expand toggle -->
+                    ${hasExtra ? `
+                    <button class="btn-expand" id="btn-${i}" onclick="toggleDetail(${i})">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+                        อะไหล่ &amp; การแก้ไข
+                    </button>
+                    <div class="card-detail" id="detail-${i}">
+                        <div class="detail-inner">
+                            ${r.solution && r.solution !== '-' ? `
+                            <div class="solution-box">
+                                <label>การแก้ไข (Solution)</label>
+                                <div class="problem-text">${r.solution}</div>
+                            </div>` : ''}
+                            ${r.sparePart && r.sparePart !== '-' ? `<div class="spare-badge">🔧 อะไหล่: ${r.sparePart}</div>` : ''}
+                        </div>
+                    </div>` : ''}
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function formatDMY(dateStr) {
@@ -495,6 +564,14 @@
             if (simpleTimeMatch) return simpleTimeMatch[1];
             
             return timeStr;
+        }
+
+        function toggleDetail(i) {
+            const detail = document.getElementById(`detail-${i}`);
+            const btn = document.getElementById(`btn-${i}`);
+            const isOpen = detail.classList.contains('open');
+            detail.classList.toggle('open', !isOpen);
+            btn.classList.toggle('open', !isOpen);
         }
 
         window.onload = init;

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เบิกอะไหล่ (Spare Part) - Maintenance System</title>
+    <script src="theme.js?v=2"></script>
     <style>
         :root {
             --primary: #007BFF;
@@ -15,6 +16,14 @@
             --border: rgba(255, 255, 255, 0.1);
         }
 
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #1c1e21;
+            --text-dim: rgba(0, 0, 0, 0.6);
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg);
@@ -24,6 +33,7 @@
             display: flex;
             justify-content: center;
             padding: 40px 0;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {

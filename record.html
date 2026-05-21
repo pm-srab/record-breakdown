@@ -4,30 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Record Break Down</title>
+    <script src="theme.js?v=2"></script>
     <style>
+        :root {
+            --bg: #1a1a1a;
+            --container-bg: #1f3050;
+            --text-main: #ffffff;
+            --input-bg: #0d1a33;
+            --input-border: #2c3e50;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-main: #1c1e21;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
+            background-color: var(--bg);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
             padding: 20px 10px; /* Reduced padding for mobile */
-            color: #ffffff;
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            background-color: #1f3050;
+            background-color: var(--container-bg);
             padding: 30px 20px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             width: 100%;
             max-width: 450px;
+            border: 1px solid var(--border);
             border-top: 8px solid #007BFF;
             position: relative;
             animation: fadeIn 0.5s ease-out;
             touch-action: manipulation;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         @keyframes fadeIn {
@@ -39,7 +61,7 @@
             margin-top: 0;
             margin-bottom: 30px;
             text-align: center;
-            color: #ffffff;
+            color: var(--text-main);
             font-size: 26px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -65,13 +87,13 @@
             margin-left: 5px;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 14px;
             border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #0d1a33;
-            color: #ffffff;
+            border: 2px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-main);
             font-size: 16px;
             box-sizing: border-box;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -79,11 +101,21 @@
             resize: vertical;
         }
 
-        input:focus, textarea:focus {
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 18px;
+            padding-right: 40px !important;
+        }
+
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #007BFF;
             box-shadow: 0 0 12px rgba(0, 123, 255, 0.3);
-            background-color: #162447;
+            background-color: var(--input-bg);
             transform: scale(1.02);
         }
 
@@ -182,8 +214,8 @@
         .input-prefix-wrapper {
             display: flex;
             align-items: center;
-            background-color: #0d1a33;
-            border: 2px solid #2c3e50;
+            background-color: var(--input-bg);
+            border: 2px solid var(--input-border);
             border-radius: 12px;
             padding-left: 15px;
             transition: all 0.3s ease;
@@ -340,20 +372,7 @@
             <form id="pendingForm">
                 <div class="form-group">
                     <label for="p_breakdownDate">วันที่แจ้งซ่อม (DATE):</label>
-                    <input type="date" id="p_breakdownDate" required style="
-                        width: 100%; 
-                        padding: 14px; 
-                        border-radius: 12px; 
-                        border: 2px solid #2c3e50; 
-                        background-color: #0d1a33; 
-                        color: #ffffff; 
-                        font-size: 16px; 
-                        outline: none;
-                        transition: all 0.3s ease;
-                        box-sizing: border-box;
-                        font-family: inherit;
-                        text-align: left;
-                    ">
+                    <input type="date" id="p_breakdownDate" required>
                 </div>
 
                 <div class="form-group">
@@ -376,22 +395,7 @@
 
                 <div class="form-group">
                     <label for="p_department">หน่วยงาน:</label>
-                    <select id="p_department" required style="
-                        width: 100%; 
-                        padding: 14px; 
-                        padding-right: 40px;
-                        border-radius: 12px; 
-                        border: 2px solid #2c3e50; 
-                        background-color: #0d1a33; 
-                        color: #ffffff; 
-                        font-size: 16px; 
-                        appearance: none;
-                        -webkit-appearance: none;
-                        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-                        background-repeat: no-repeat;
-                        background-position: right 15px center;
-                        background-size: 18px;
-                        transition: all 0.3s ease;">
+                    <select id="p_department" required>
                         <option value="" disabled selected>เลือกหน่วยงาน</option>
                         <option value="Press">Press</option>
                         <option value="Ass'y">Ass'y</option>
@@ -402,22 +406,7 @@
 
                 <div class="form-group">
                     <label for="p_factory">โรงงาน (Factory):</label>
-                    <select id="p_factory" required style="
-                        width: 100%; 
-                        padding: 14px; 
-                        padding-right: 40px;
-                        border-radius: 12px; 
-                        border: 2px solid #2c3e50; 
-                        background-color: #0d1a33; 
-                        color: #ffffff; 
-                        font-size: 16px; 
-                        appearance: none;
-                        -webkit-appearance: none;
-                        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220 0 24 24%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226 9 12 15 18 9%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');
-                        background-repeat: no-repeat;
-                        background-position: right 15px center;
-                        background-size: 18px;
-                        transition: all 0.3s ease;">
+                    <select id="p_factory" required>
                         <option value="" disabled selected>เลือกโรงงาน</option>
                         <option value="โรง1">โรง1</option>
                         <option value="โรง2">โรง2</option>
