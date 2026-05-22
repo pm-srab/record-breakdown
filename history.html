@@ -484,6 +484,20 @@
 
             list.innerHTML = displayList.map((r, i) => {
                 const hasExtra = (r.solution && r.solution !== '-') || (r.sparePart && r.sparePart !== '-');
+                
+                // Calculate duration in minutes for display if missing in sheet
+                let durationDisplay = r.duration || "-";
+                if ((!durationDisplay || durationDisplay === "-") && r.time && r.finishTime && r.finishTime !== "-") {
+                    const [h1, m1] = formatTimeOnly(r.time).split(':').map(Number);
+                    const [h2, m2] = formatTimeOnly(r.finishTime).split(':').map(Number);
+                    if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
+                        let startMin = h1 * 60 + m1;
+                        let endMin = h2 * 60 + m2;
+                        if (endMin < startMin) endMin += 1440;
+                        durationDisplay = (endMin - startMin) + " นาที";
+                    }
+                }
+
                 return `
                 <div class="record-card">
                     <!-- One-line compact info row -->
@@ -495,7 +509,7 @@
                         <div class="info-chip"><strong>${formatTimeOnly(r.time)}</strong>–<strong>${formatTimeOnly(r.finishTime)}</strong></div>
                         <div class="dot-sep"></div>
                         <div class="info-chip"><strong>${r.department || '-'}</strong></div>
-                        ${r.duration ? `<div class="dot-sep"></div><div class="info-chip">⏱ <strong>${r.duration}</strong></div>` : ''}
+                        ${durationDisplay && durationDisplay !== "-" ? `<div class="dot-sep"></div><div class="info-chip">⏱ <strong>${durationDisplay}</strong></div>` : ''}
                         <div class="record-date">${formatDMY(r.date)}</div>
                     </div>
 

@@ -749,12 +749,29 @@
                 let duration = "-";
                 let breakdowns = JSON.parse(localStorage.getItem("breakdowns")) || [];
                 const record = breakdowns.find(r => r.id === id);
-                if (record && record.time && finishTime) {
-                    const [h1, m1] = formatTimeOnly(record.time).split(':').map(Number);
+                let startTime = record ? record.time : null;
+
+                // Fallback: If record not found due to sync/ID mismatch, read from the DOM card
+                if (!startTime) {
+                    const card = document.getElementById(`card-${id}`);
+                    if (card) {
+                        const timeTextEl = card.querySelector('.time-text');
+                        if (timeTextEl) {
+                            const text = timeTextEl.innerText.trim();
+                            const parts = text.split(' ');
+                            startTime = parts[parts.length - 1]; // Extract the HH:mm time part
+                        }
+                    }
+                }
+
+                if (startTime && startTime !== "-" && finishTime) {
+                    const [h1, m1] = formatTimeOnly(startTime).split(':').map(Number);
                     const [h2, m2] = finishTime.split(':').map(Number);
-                    let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-                    if (diff < 0) diff += 1440;
-                    duration = `${diff} นาที`;
+                    if (!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)) {
+                        let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+                        if (diff < 0) diff += 1440;
+                        duration = `${diff} นาที`;
+                    }
                 }
 
                 const formData = new URLSearchParams();

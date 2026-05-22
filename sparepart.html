@@ -400,6 +400,77 @@
             padding-right: 0 !important;
         }
 
+        .part-photo-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .part-photo-container:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .part-photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .part-photo-initials {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #modalPhotoContainer {
+            cursor: pointer;
+        }
+
+        #modalPhotoContainer .part-photo-container {
+            width: 70px;
+            height: 70px;
+            border-radius: 14px;
+            position: relative;
+        }
+
+        #modalPhotoContainer .part-photo-container::after {
+            content: "📸 Upload";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            border-radius: 14px;
+        }
+
+        #modalPhotoContainer:hover .part-photo-container::after {
+            opacity: 1;
+        }
+
+        #modalPhotoContainer .part-photo-initials {
+            font-size: 24px;
+        }
+
         /* Fixed widths for specific columns */
         .w-stock { width: 90px; }
         .w-location { width: 140px; }
@@ -695,6 +766,7 @@
     </style>
 </head>
 <body>
+    <input type="file" id="modalPhotoInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)">
     <div class="container">
         <div class="header">
             <h1>คลังอะไหล่ (Spare Parts)</h1>
@@ -728,6 +800,7 @@
             <table class="spare-table">
                 <thead>
                     <tr>
+                        <th style="width: 80px; text-align: center;">Photo</th>
                         <th>Part Name</th>
                         <th>Model</th>
                         <th>Brand Name</th>
@@ -738,7 +811,7 @@
                 </thead>
                 <tbody id="spareTableBody">
                     <tr id="tableLoader">
-                        <td colspan="6" style="text-align: center; padding: 50px;">
+                        <td colspan="7" style="text-align: center; padding: 50px;">
                             <div class="loading-spinner" style="width: 30px; height: 30px; border-width: 3px; margin: 0 auto 15px auto;"></div>
                             <div style="color: var(--text-dim); font-size: 14px;">กำลังโหลดข้อมูลจาก Google Sheet...</div>
                         </td>
@@ -766,6 +839,19 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                     ประวัติของอะไหล่นี้
                 </button>
+            </div>
+            
+            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 25px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div id="modalPhotoContainer" onclick="document.getElementById('modalPhotoInput').click();" title="คลิกเพื่ออัปโหลดรูปภาพ"></div>
+                <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
+                    <div id="modalHeaderPartName" style="font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 5px;">-</div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <span id="modalHeaderModel" style="font-family: monospace; font-size: 13px; color: var(--text-dim);">-</span>
+                        <button id="btnDeletePhoto" class="btn-history" style="display: none; margin: 0; padding: 4px 8px; font-size: 11px; background: rgba(255, 71, 87, 0.1); border-color: #ff4757; color: #ff4757; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#ff4757'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255, 71, 87, 0.1)'; this.style.color='#ff4757';" onclick="deletePartPhoto()">
+                            ลบรูปภาพ
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <div class="modal-grid">
@@ -886,6 +972,57 @@
             return match ? match[1] : "";
         }
 
+        function getPartPhotoHTML(part) {
+            const photoUrl = part.photo ? String(part.photo).trim() : '';
+            
+            // Check if it looks like a valid image URL (starts with http, https, data:image, etc.)
+            if (photoUrl && (photoUrl.startsWith('http') || photoUrl.startsWith('data:image') || photoUrl.includes('.'))) {
+                return `
+                    <div class="part-photo-container">
+                        <img src="${photoUrl}" alt="${part.name}" class="part-photo-img" onerror="this.outerHTML=getPartPlaceholderHTML('${part.name.replace(/'/g, "\\'")}')" />
+                    </div>
+                `;
+            }
+            
+            return getPartPlaceholderHTML(part.name);
+        }
+        
+        function getPartPlaceholderHTML(name) {
+            const cleanName = String(name || '').trim().replace(/['"]/g, '');
+            // Get initials (up to 2 characters)
+            const words = cleanName.split(/[\s\-()]+/);
+            let initials = '';
+            if (words.length > 0 && words[0]) initials += words[0][0];
+            if (words.length > 1 && words[1]) initials += words[1][0];
+            initials = initials.toUpperCase() || 'P';
+            
+            // Premium gradient combinations
+            const gradients = [
+                'linear-gradient(135deg, #007bff 0%, #00d2ff 100%)', // Blue/Cyan
+                'linear-gradient(135deg, #6f42c1 0%, #a020f0 100%)', // Purple
+                'linear-gradient(135deg, #fd7e14 0%, #ffc107 100%)', // Orange/Yellow
+                'linear-gradient(135deg, #dc3545 0%, #ff758c 100%)', // Red/Pink
+                'linear-gradient(135deg, #28a745 0%, #20c997 100%)', // Green/Teal
+                'linear-gradient(135deg, #e83e8c 0%, #ff758c 100%)', // Pink
+                'linear-gradient(135deg, #20c997 0%, #00d2ff 100%)', // Teal/Cyan
+                'linear-gradient(135deg, #17a2b8 0%, #007bff 100%)'  // Indigo/Blue
+            ];
+            
+            // Hash the part name to get a consistent gradient
+            let hash = 0;
+            for (let i = 0; i < cleanName.length; i++) {
+                hash = cleanName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % gradients.length;
+            const gradient = gradients[index];
+            
+            return `
+                <div class="part-photo-container" style="background: ${gradient};">
+                    <span class="part-photo-initials">${initials}</span>
+                </div>
+            `;
+        }
+
         // Fetch Spare Parts from Google Sheets
         async function fetchSpareParts() {
             // Load local cache immediately for zero lag
@@ -908,6 +1045,7 @@
                             stock: parseInt(row[3]) || 0,
                             location: row[4] || "-",
                             edit: row[5] || "",
+                            photo: row[6] || "", // Column G (7th column)
                             rowNumber: index + 1 // exact row in sheet (1-based)
                         }))
                         .filter((item, index) => {
@@ -923,7 +1061,7 @@
                 if (!spareParts.length) {
                     document.getElementById('spareTableBody').innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                            <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-dim);">
                                 เกิดข้อผิดพลาดในการโหลดข้อมูล แต่ประวัติในระบบจะยังคงใช้งานได้
                             </td>
                         </tr>
@@ -956,7 +1094,7 @@
             if (filteredParts.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state">
+                        <td colspan="7" class="empty-state">
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
                             <div>ไม่พบข้อมูลอะไหล่ที่ค้นหา</div>
                         </td>
@@ -976,12 +1114,13 @@
 
             tbody.innerHTML = pagedParts.map(part => `
                 <tr>
-                    <td style="font-weight: 700;">${part.name}</td>
-                    <td style="font-family: monospace; color: var(--text-dim);">${part.model}</td>
-                    <td>${part.brand}</td>
-                    <td class="col-fixed"><span class="stock-badge" style="${part.stock <= 5 ? 'background: rgba(255, 71, 87, 0.1); color: #ff4757;' : ''}">${part.stock}</span></td>
-                    <td>${part.location}</td>
-                    <td class="col-fixed w-action">
+                    <td class="col-fixed" style="vertical-align: middle;">${getPartPhotoHTML(part)}</td>
+                    <td style="font-weight: 700; vertical-align: middle;">${part.name}</td>
+                    <td style="font-family: monospace; color: var(--text-dim); vertical-align: middle;">${part.model}</td>
+                    <td style="vertical-align: middle;">${part.brand}</td>
+                    <td class="col-fixed" style="vertical-align: middle;"><span class="stock-badge" style="${part.stock <= 5 ? 'background: rgba(255, 71, 87, 0.1); color: #ff4757;' : ''}">${part.stock}</span></td>
+                    <td style="vertical-align: middle;">${part.location}</td>
+                    <td class="col-fixed w-action" style="vertical-align: middle;">
                         <button class="btn-edit" onclick="openEditModal('${part.name.replace(/'/g, "\\'")}', '${part.model.replace(/'/g, "\\'")}', ${part.stock}, '${part.location.replace(/'/g, "\\'")}', ${part.rowNumber})">
                             Edit
                         </button>
@@ -1040,17 +1179,22 @@
                 if (googleData && Array.isArray(googleData) && googleData.length > 1) {
                     // Row 0 is header row: ["วันที่แก้ไข", "ชื่ออะไหล่", "รุ่น", "ยี่ห้อ", "จำนวนที่เบิก", "รายละเอียด", "ตำแหน่ง", "คงเหลือ"]
                     const historyItems = googleData
-                        .map((row, index) => ({
-                            date: row[0],
-                            name: row[1],
-                            model: row[2],
-                            brand: row[3],
-                            quantity: parseInt(row[4]) || 0,
-                            detail: row[5] || "-",
-                            location: row[6] || "-",
-                            stock: parseInt(row[7]) || 0,
-                            rowNumber: index + 1
-                        }))
+                        .map((row, index) => {
+                            const name = row[1];
+                            const matchingPart = spareParts.find(p => String(p.name).trim().toLowerCase() === String(name).trim().toLowerCase());
+                            return {
+                                date: row[0],
+                                name: row[1],
+                                model: row[2],
+                                brand: row[3],
+                                quantity: parseInt(row[4]) || 0,
+                                detail: row[5] || "-",
+                                location: row[6] || "-",
+                                stock: parseInt(row[7]) || 0,
+                                photo: matchingPart ? matchingPart.photo : "",
+                                rowNumber: index + 1
+                            };
+                        })
                         .filter((item, index) => {
                             const isHeader = String(item.date).includes("วันที่แก้ไข") || index === 0;
                             return !isHeader && item.date && item.name;
@@ -1180,6 +1324,7 @@
                     <table style="width: 100%; min-width: 950px; border-collapse: collapse; text-align: left; font-size: 13px;">
                         <thead>
                             <tr style="background: rgba(0, 123, 255, 0.15); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 12px 16px; font-weight: 700; color: var(--primary); text-align: center; width: 60px;">Photo</th>
                                 <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Part Name</th>
                                 <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Model</th>
                                 <th style="padding: 12px 16px; font-weight: 700; color: var(--primary);">Brand</th>
@@ -1194,9 +1339,10 @@
                         <tbody>
                             ${monthData.items.map(item => `
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); transition: background 0.2s;">
-                                    <td style="padding: 12px 16px; font-weight: 700; color: #fff;">${item.name}</td>
-                                    <td style="padding: 12px 16px; font-family: monospace; color: var(--text-dim);">${item.model}</td>
-                                    <td style="padding: 12px 16px; color: var(--text-dim);">${item.brand}</td>
+                                    <td style="padding: 12px 16px; text-align: center; vertical-align: middle;">${getPartPhotoHTML(item)}</td>
+                                    <td style="padding: 12px 16px; font-weight: 700; color: #fff; vertical-align: middle;">${item.name}</td>
+                                    <td style="padding: 12px 16px; font-family: monospace; color: var(--text-dim); vertical-align: middle;">${item.model}</td>
+                                    <td style="padding: 12px 16px; color: var(--text-dim); vertical-align: middle;">${item.brand}</td>
                                     <td style="padding: 12px 16px; text-align: center;">
                                         <span class="stock-badge" style="background: rgba(255, 165, 0, 0.1); color: #ffa500; font-weight: bold; border: 1px solid rgba(255, 165, 0, 0.2);">${item.quantity}</span>
                                     </td>
@@ -1279,10 +1425,30 @@
 
             document.getElementById('modalPartName').innerText = name;
             document.getElementById('modalModel').innerText = model;
+            document.getElementById('modalHeaderPartName').innerText = name;
+            document.getElementById('modalHeaderModel').innerText = model;
             document.getElementById('modalStock').value = stock;
             document.getElementById('modalUsage').value = 1;
             document.getElementById('modalUsage').max = stock; // Limit maximum input to current stock
             
+            const part = spareParts.find(p => p.rowNumber === rowNumber);
+            const photoContainer = document.getElementById('modalPhotoContainer');
+            const deleteBtn = document.getElementById('btnDeletePhoto');
+            
+            if (photoContainer && part) {
+                photoContainer.innerHTML = getPartPhotoHTML(part);
+                
+                // Show delete button only if custom photo exists
+                const photoUrl = part.photo ? String(part.photo).trim() : '';
+                if (photoUrl && (photoUrl.startsWith('http') || photoUrl.startsWith('data:image') || photoUrl.includes('.'))) {
+                    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+                } else {
+                    if (deleteBtn) deleteBtn.style.display = 'none';
+                }
+            } else {
+                if (deleteBtn) deleteBtn.style.display = 'none';
+            }
+
             // Set today's date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('modalDate').value = today;
@@ -1300,6 +1466,159 @@
 
         function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show temporary loading spinner
+            const photoContainer = document.getElementById('modalPhotoContainer');
+            const originalHTML = photoContainer.innerHTML;
+            photoContainer.innerHTML = `
+                <div class="part-photo-container" style="background: rgba(255,255,255,0.05); position: relative;">
+                    <div class="loading-spinner" style="width: 20px; height: 20px; border-width: 2.5px; margin: 10px auto;"></div>
+                </div>
+            `;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Create canvas to resize and compress image to keep spreadsheet lightweight
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 250;
+                    const MAX_HEIGHT = 250;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to high-quality compressed JPEG (0.8 quality = ~5KB to 10KB)
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+
+                    // Save directly to Google Sheet
+                    savePartPhoto(activeRowNumber, base64Data, originalHTML);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function savePartPhoto(rowNumber, base64Data, fallbackHTML) {
+            try {
+                // Instantly update local cache and memory to provide immediate feedback
+                const index = spareParts.findIndex(p => p.rowNumber === rowNumber);
+                if (index !== -1) {
+                    spareParts[index].photo = base64Data;
+                    localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+                    
+                    filterParts(); // Re-render main table
+                    
+                    const photoContainer = document.getElementById('modalPhotoContainer');
+                    if (photoContainer) {
+                        photoContainer.innerHTML = getPartPhotoHTML(spareParts[index]);
+                    }
+                    
+                    // Show delete button
+                    const deleteBtn = document.getElementById('btnDeletePhoto');
+                    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+                }
+
+                // POST request to Apps Script Web App
+                const formData = new URLSearchParams();
+                formData.append('action', 'updatePhoto');
+                formData.append('rowNumber', rowNumber);
+                formData.append('photo', base64Data);
+
+                await fetch(SPARE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                
+                alert("อัปโหลดและบันทึกรูปภาพเรียบร้อย!");
+
+            } catch (e) {
+                console.error("Upload photo error:", e);
+                alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
+                const photoContainer = document.getElementById('modalPhotoContainer');
+                if (photoContainer) photoContainer.innerHTML = fallbackHTML;
+            }
+        }
+
+        async function deletePartPhoto() {
+            // Confirm from user
+            const confirmed = confirm("คุณต้องการลบรูปภาพของอะไหล่นี้ใช่หรือไม่?");
+            if (!confirmed) return;
+
+            const photoContainer = document.getElementById('modalPhotoContainer');
+            const originalHTML = photoContainer.innerHTML;
+            
+            // Show loading spinner
+            photoContainer.innerHTML = `
+                <div class="part-photo-container" style="background: rgba(255,255,255,0.05); position: relative;">
+                    <div class="loading-spinner" style="width: 20px; height: 20px; border-width: 2.5px; margin: 10px auto;"></div>
+                </div>
+            `;
+
+            try {
+                // Instantly update local cache and memory to provide immediate feedback
+                const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
+                if (index !== -1) {
+                    spareParts[index].photo = "";
+                    localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+                    
+                    filterParts(); // Re-render main table
+                    
+                    const photoContainer = document.getElementById('modalPhotoContainer');
+                    if (photoContainer) {
+                        photoContainer.innerHTML = getPartPhotoHTML(spareParts[index]);
+                    }
+                    
+                    // Hide delete button
+                    const deleteBtn = document.getElementById('btnDeletePhoto');
+                    if (deleteBtn) deleteBtn.style.display = 'none';
+                }
+
+                // POST request to Apps Script Web App (sending empty string clears the column G)
+                const formData = new URLSearchParams();
+                formData.append('action', 'updatePhoto');
+                formData.append('rowNumber', activeRowNumber);
+                formData.append('photo', "");
+
+                await fetch(SPARE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                
+                alert("ลบรูปภาพเรียบร้อย!");
+
+            } catch (e) {
+                console.error("Delete photo error:", e);
+                alert("เกิดข้อผิดพลาดในการลบรูปภาพลงระบบ");
+                const photoContainer = document.getElementById('modalPhotoContainer');
+                if (photoContainer) photoContainer.innerHTML = originalHTML;
+            }
         }
 
         async function saveStock() {
