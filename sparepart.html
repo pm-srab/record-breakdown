@@ -445,7 +445,7 @@
         }
 
         #modalPhotoContainer .part-photo-container::after {
-            content: "📸 Upload";
+            content: "📸 Upload/Paste";
             position: absolute;
             top: 0;
             left: 0;
@@ -465,6 +465,59 @@
 
         #modalPhotoContainer:hover .part-photo-container::after {
             opacity: 1;
+        }
+
+        #modalPhotoContainer.drag-over .part-photo-container {
+            border: 2px dashed var(--primary) !important;
+            box-shadow: 0 0 15px var(--primary-glow) !important;
+            transform: scale(1.05);
+        }
+        
+        #modalPhotoContainer.drag-over .part-photo-container::after {
+            opacity: 1 !important;
+            content: "📥 Drop Here" !important;
+        }
+
+        #uploadDropzone {
+            border: 2px dashed rgba(255, 255, 255, 0.15) !important;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        #uploadDropzone:hover {
+            border-color: var(--primary) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+        }
+
+        #uploadDropzone.drag-over {
+            border-color: var(--primary) !important;
+            background: rgba(0, 123, 255, 0.08) !important;
+            box-shadow: 0 0 20px var(--primary-glow) !important;
+            transform: scale(1.02);
+        }
+
+        #uploadDropzone svg {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke 0.3s ease;
+        }
+
+        #uploadDropzone:hover svg {
+            transform: scale(1.08);
+            stroke: #fff;
+        }
+
+        #uploadDropzone.drag-over svg {
+            transform: scale(1.15) rotate(-5deg);
+            stroke: var(--primary);
         }
 
         #modalPhotoContainer .part-photo-initials {
@@ -842,7 +895,7 @@
             </div>
             
             <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 25px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div id="modalPhotoContainer" onclick="document.getElementById('modalPhotoInput').click();" title="คลิกเพื่ออัปโหลดรูปภาพ"></div>
+                <div id="modalPhotoContainer" onclick="openUploadModal();" title="คลิกเพื่ออัปโหลดรูปภาพ"></div>
                 <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
                     <div id="modalHeaderPartName" style="font-weight: 700; font-size: 18px; color: #fff; margin-bottom: 5px;">-</div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
@@ -900,6 +953,33 @@
                 <button class="btn-modal btn-cancel" onclick="closeEditModal()">ยกเลิก</button>
                 <button class="btn-modal btn-save-stock" onclick="saveStock()">บันทึก stock</button>
                 <button class="btn-modal btn-save" onclick="saveUsage()">บันทึกการใช้</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal" style="display: none; z-index: 4000;">
+        <div class="modal-card" style="max-width: 450px; text-align: center;">
+            <h3 class="modal-title" style="font-size: 20px; margin-bottom: 20px; text-align: center;">อัปโหลดรูปภาพอะไหล่</h3>
+            
+            <div id="uploadDropzone" onclick="document.getElementById('modalPhotoInput').click();">
+                <div style="margin-bottom: 10px; display: flex; justify-content: center; align-items: center;">
+                    <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 10px var(--primary-glow));">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </div>
+                <div style="font-weight: 700; font-size: 16px; color: #fff; margin-top: 5px;">
+                    กด <kbd style="background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); font-family: inherit;">Ctrl + V</kbd> เพื่อวางรูปภาพ
+                </div>
+                <div style="color: var(--text-dim); font-size: 13px;">หรือ ลากไฟล์รูปภาพมาวางที่นี่</div>
+                <div style="color: var(--primary); font-size: 13px; font-weight: 600; margin-top: 10px; text-decoration: underline;">
+                    คลิกเพื่อเลือกไฟล์จากโฟลเดอร์
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="grid-template-columns: 1fr; margin-top: 25px;">
+                <button class="btn-modal btn-cancel" onclick="closeUploadModal()" style="width: 100%;">ยกเลิก</button>
             </div>
         </div>
     </div>
@@ -1468,9 +1548,23 @@
             document.getElementById('editModal').style.display = 'none';
         }
 
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
         function handlePhotoUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+            processAndUploadImageFile(file);
+        }
+
+        function processAndUploadImageFile(file) {
+            // Close the upload modal if open
+            closeUploadModal();
 
             // Show temporary loading spinner
             const photoContainer = document.getElementById('modalPhotoContainer');
@@ -1801,13 +1895,103 @@
         window.onclick = function(event) {
             const editModal = document.getElementById('editModal');
             const historyModal = document.getElementById('historyModal');
+            const uploadModal = document.getElementById('uploadModal');
             if (event.target == editModal) closeEditModal();
             if (event.target == historyModal) closeHistoryModal();
+            if (event.target == uploadModal) closeUploadModal();
         }
 
         // Bind Search events
         document.getElementById('searchInput').addEventListener('input', filterParts);
         document.getElementById('searchType').addEventListener('change', filterParts);
+
+        // Bind Drag and Drop events to modalPhotoContainer
+        const modalPhotoContainer = document.getElementById('modalPhotoContainer');
+        if (modalPhotoContainer) {
+            modalPhotoContainer.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                modalPhotoContainer.classList.add('drag-over');
+            });
+            modalPhotoContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                modalPhotoContainer.classList.add('drag-over');
+            });
+            modalPhotoContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                modalPhotoContainer.classList.remove('drag-over');
+            });
+            modalPhotoContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                modalPhotoContainer.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        processAndUploadImageFile(file);
+                    } else {
+                        alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                    }
+                }
+            });
+        }
+
+        // Bind Drag and Drop events to uploadDropzone
+        const uploadDropzone = document.getElementById('uploadDropzone');
+        if (uploadDropzone) {
+            uploadDropzone.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadDropzone.classList.add('drag-over');
+            });
+            uploadDropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadDropzone.classList.add('drag-over');
+            });
+            uploadDropzone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadDropzone.classList.remove('drag-over');
+            });
+            uploadDropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadDropzone.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        processAndUploadImageFile(file);
+                    } else {
+                        alert("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+                    }
+                }
+            });
+        }
+
+        // Bind global Paste event
+        document.addEventListener('paste', function(e) {
+            const editModal = document.getElementById('editModal');
+            if (!editModal || editModal.style.display !== 'flex') return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        processAndUploadImageFile(file);
+                        e.preventDefault(); // Prevent default paste behavior
+                        break;
+                    }
+                }
+            }
+        });
 
         // Initial Data Fetch
         window.onload = function() {
