@@ -1264,6 +1264,7 @@
                             <th>ไลน์</th>
                             <th>เครื่องจักร</th>
                             <th>เวลาแจ้ง</th>
+                            <th>วันที่เสร็จ</th>
                             <th>เวลาเสร็จ</th>
                             <th>รวมเวลา</th>
                             <th>หน่วยงาน</th>
@@ -1552,14 +1553,15 @@
                             machineId: row[2],
                             caseCount: 1,
                             time: row[3],
-                            finishTime: row[4],
-                            duration: row[5],
-                            department: row[6],
-                            factory: row[7],
-                            problem: row[8],
-                            solution: row[9],
-                            sparePart: row[10],
-                            sevenMean: row[11],
+                            finishDate: row[4],
+                            finishTime: row[5],
+                            duration: row[6],
+                            department: row[7],
+                            factory: row[8],
+                            problem: row[9],
+                            solution: row[10],
+                            sparePart: row[11],
+                            sevenMean: row[12],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
                         .filter((r, idx) => {
@@ -1628,6 +1630,7 @@
                     <td>${record.line}</td>
                     <td><strong>${record.machineId}</strong></td>
                     <td>${formatTimeOnly(record.time)}</td>
+                    <td>${formatDMY(record.finishDate)}</td>
                     <td>${formatTimeOnly(record.finishTime)}</td>
                     <td class="col-duration"><span class="badge-time">${durationMinutes}</span></td>
                     <td>${record.department}</td>

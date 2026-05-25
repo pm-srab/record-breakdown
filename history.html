@@ -412,14 +412,15 @@
                             line: row[1],
                             machineId: row[2],
                             time: row[3],
-                            finishTime: row[4],
-                            duration: row[5],
-                            department: row[6],
-                            factory: row[7],
-                            problem: row[8],
-                            solution: row[9],
-                            sparePart: row[10],
-                            sevenMean: row[11]
+                            finishDate: row[4],
+                            finishTime: row[5],
+                            duration: row[6],
+                            department: row[7],
+                            factory: row[8],
+                            problem: row[9],
+                            solution: row[10],
+                            sparePart: row[11],
+                            sevenMean: row[12]
                         }))
                         .filter((r, idx) => {
                             const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");

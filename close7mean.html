@@ -588,8 +588,8 @@
                     const cloudBreakdowns = googleData
                         .map((row, originalIndex) => ({
                             date: row[0], line: row[1], machineId: row[2], caseCount: 1,
-                            time: row[3], finishTime: row[4], duration: row[5], department: row[6],
-                            factory: row[7], problem: row[8], solution: row[9], sparePart: row[10], sevenMean: row[11],
+                            time: row[3], finishDate: row[4], finishTime: row[5], duration: row[6], department: row[7],
+                            factory: row[8], problem: row[9], solution: row[10], sparePart: row[11], sevenMean: row[12],
                             id: originalIndex // This is the real row index in the sheet!
                         }))
                         .filter((r, idx) => {
@@ -680,17 +680,23 @@
                     <div class="closing-form">
                         <div class="form-row">
                             <div class="form-field">
+                                <label>วันที่ซ่อมเสร็จ:</label>
+                                <input type="date" id="finishDate-${record.id}">
+                            </div>
+                            <div class="form-field">
                                 <label>เวลาซ่อมเสร็จ:</label>
                                 <input type="text" id="finish-${record.id}" placeholder="-- : --" maxlength="5">
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-field">
                                 <label>รหัส 7 mean:</label>
                                 <input type="text" id="seven-${record.id}" placeholder="รหัส 7 mean">
                             </div>
-                        </div>
-                        <div class="form-field">
-                            <label>วิธีแก้ไข:</label>
-                            <textarea id="sol-${record.id}" rows="2" placeholder="ระบุวิธีแก้ไข..."></textarea>
+                            <div class="form-field">
+                                <label>วิธีแก้ไข:</label>
+                                <textarea id="sol-${record.id}" rows="2" placeholder="ระบุวิธีแก้ไข..."></textarea>
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-field">
@@ -707,8 +713,16 @@
                 </div>
             `).join('');
 
-            // Setup time inputs
-            records.forEach(r => setupTimeInput(`finish-${r.id}`));
+            // Setup time inputs & date inputs default to today
+            records.forEach(r => {
+                setupTimeInput(`finish-${r.id}`);
+                const dateInput = document.getElementById(`finishDate-${r.id}`);
+                if (dateInput) {
+                    const today = new Date();
+                    const pad = (n) => String(n).padStart(2, '0');
+                    dateInput.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+                }
+            });
         }
 
         function setupTimeInput(id) {
@@ -722,15 +736,24 @@
         }
 
         async function closePendingWork(id, btn) {
+            const rawFinishDate = document.getElementById(`finishDate-${id}`).value;
             const finishTime = document.getElementById(`finish-${id}`).value;
             const solution = document.getElementById(`sol-${id}`).value.trim();
             const sevenMean = document.getElementById(`seven-${id}`).value.trim();
             const partName = document.getElementById(`partName-${id}`).value.trim();
             const partModel = document.getElementById(`partModel-${id}`).value.trim();
 
-            if (!finishTime || !solution) {
-                alert("กรุณากรอกเวลาซ่อมเสร็จและวิธีแก้ไข");
+            if (!rawFinishDate || !finishTime || !solution) {
+                alert("กรุณากรอกวันที่ซ่อมเสร็จ เวลาซ่อมเสร็จ และวิธีแก้ไข");
                 return;
+            }
+
+            let finishDate = "-";
+            if (rawFinishDate) {
+                const parts = rawFinishDate.split('-');
+                if (parts.length === 3) {
+                    finishDate = `${parts[2]}/${parts[1]}/${parts[0]}`; // Convert to DD/MM/YYYY
+                }
             }
 
             if (sevenMean && sevenMean !== "-" && sevenMean.length !== 10) {
@@ -777,6 +800,7 @@
                 const formData = new URLSearchParams();
                 formData.append('action', 'update');
                 formData.append('rowIndex', id);
+                formData.append('finishDate', finishDate);
                 formData.append('finishTime', finishTime);
                 formData.append('solution', solution);
                 formData.append('sevenMean', sevenMean);
@@ -792,6 +816,7 @@
 
                 const index = breakdowns.findIndex(r => r.id === id);
                 if (index !== -1) {
+                    breakdowns[index].finishDate = finishDate;
                     breakdowns[index].finishTime = finishTime;
                     breakdowns[index].solution = solution;
                     breakdowns[index].sevenMean = sevenMean;
