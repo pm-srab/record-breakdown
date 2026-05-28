@@ -24,6 +24,59 @@
             --border: rgba(0, 0, 0, 0.1);
         }
 
+        [data-theme="light"] .filter-card {
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .select-custom,
+        [data-theme="light"] .search-box {
+            background-color: rgba(0, 0, 0, 0.03);
+            color: var(--text);
+        }
+
+        [data-theme="light"] .select-custom {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        }
+
+        [data-theme="light"] .table-container {
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="light"] .table-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="light"] .table-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .spare-table {
+            color: var(--text);
+        }
+
+        [data-theme="light"] .spare-table tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="light"] .btn-back,
+        [data-theme="light"] .btn-edit {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="light"] .btn-back:hover,
+        [data-theme="light"] .btn-edit:hover {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--text);
+        }
+
+        [data-theme="light"] .pagination-container {
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg);
@@ -315,14 +368,34 @@
         .table-container {
             background: #000000;
             border-radius: 16px;
-            overflow: hidden;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             border: 1px solid var(--border);
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             margin-top: 20px;
         }
 
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
         .spare-table {
             width: 100%;
+            min-width: 900px;
             border-collapse: collapse;
             color: #fff;
         }
@@ -350,6 +423,16 @@
 
         .spare-table tr:hover {
             background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pagination-container {
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
         .badge-status {
@@ -874,7 +957,7 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="pagination-container" id="paginationCtrl" style="display: none; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px 20px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid var(--border);">
+        <div class="pagination-container" id="paginationCtrl" style="display: none;">
             <div style="font-size: 14px; color: var(--text-dim);" id="paginationInfo">Showing 0 to 0 of 0 items</div>
             <div style="display: flex; gap: 8px;">
                 <button class="btn-back" id="prevPageBtn" onclick="prevPage()" style="padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none;">Previous</button>
