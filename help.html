@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือการใช้งาน (System Guide) - Maintenance System</title>
+    <link rel="icon" type="image/png" href="summit_logo.png">
+    <script src="theme.js?v=2"></script>
+    <style>
+        :root {
+            --primary: #007BFF;
+            --primary-glow: rgba(0, 123, 255, 0.4);
+            --bg: #1a1a1a;
+            --card-bg: #242424;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --code-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #1c1e21;
+            --text-dim: rgba(0, 0, 0, 0.6);
+            --border: rgba(0, 0, 0, 0.1);
+            --code-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        [data-theme="light"] h1 {
+            background: linear-gradient(135deg, #1c1e21 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        [data-theme="light"] .btn-back {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        [data-theme="light"] .btn-back:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* Help Cards Grid */
+        .help-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        [data-theme="light"] .help-section {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary);
+        }
+
+        .section-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        p {
+            line-height: 1.6;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+
+        /* Guide Grid */
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .guide-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        [data-theme="light"] .guide-card {
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .guide-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
+        }
+
+        .guide-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .guide-card-header svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        /* Troubleshooting List */
+        .trouble-item {
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+        }
+
+        .trouble-item:last-child {
+            border-bottom: none;
+        }
+
+        .trouble-q {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .trouble-q::before {
+            content: "Q:";
+            color: #ff4757;
+            font-weight: 800;
+        }
+
+        .trouble-a {
+            font-size: 14.5px;
+            color: var(--text-dim);
+            padding-left: 22px;
+            line-height: 1.6;
+        }
+
+        .trouble-a code {
+            background: var(--code-bg);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Contact Box Styles */
+        .contact-card:hover {
+            transform: translateY(-4px);
+            background: rgba(0, 123, 255, 0.07) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.15);
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+            filter: brightness(1.2);
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            .help-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>คู่มือการใช้งานและสนับสนุน (Help & System Guide)</h1>
+            <a href="index.html" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                กลับหน้าหลัก
+            </a>
+        </div>
+
+        <!-- Section 1: Features Guide -->
+        <div class="help-section">
+            <h2 class="section-title">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                คู่มือการใช้งานระบบ (System Guide)
+            </h2>
+            <p>ระบบติดตามและซ่อมบำรุงเครื่องจักร (Maintenance Monitoring System) แบ่งหน้าการทำงานหลักออกเป็น 5 ส่วน ดังนี้:</p>
+            
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        1. Record (แจ้งซ่อม)
+                    </div>
+                    <p>ใช้สำหรับบันทึกแจ้งยอดขัดข้องของเครื่องจักรเข้าสู่ระบบ โดยผู้บันทึกต้องระบุไลน์การผลิต, รหัสเครื่องจักร, อาการขัดข้อง เพื่อให้ทีมช่างซ่อมบำรุงเข้าตรวจสอบ</p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        2. Dashboard (แดชบอร์ด)
+                    </div>
+                    <p>แดชบอร์ดสรุปวิเคราะห์สถิติสถานะงานซ่อมแบบ Real-time รวบรวมข้อมูลระยะเวลา Breakdown และชั่วโมงสะสมของการหยุดไลน์การผลิตของเครื่องจักรแต่ละเครื่อง</p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        3. ปิดงาน / 7 Mean
+                    </div>
+                    <p>หลังการซ่อมบำรุงเสร็จสิ้น ทำการปิดงานในส่วนนี้ โดยกรอกข้อมูลวันที่ซ่อมเสร็จ, วิธีแก้ไข, และ 7 Mean เพื่อเก็บประวัติ</p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                        4. Spare Part (คลังอะไหล่)
+                    </div>
+                    <p>ส่วนงานจัดการและตรวจสอบสต็อกชิ้นส่วนอะไหล่ สามารถทำรายการเบิกจ่ายชิ้นส่วนอะไหล่ไปใช้งาน เพื่อให้ระบบคำนวณและตัดยอดสต็อกคงเหลือในชีททันที</p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-card-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5. History (ประวัติแจ้งซ่อม)
+                    </div>
+                    <p>แสดงประวัติการแจ้งซ่อมย้อนหลังทั้งหมดของระบบอย่างละเอียด สามารถค้นหาและคัดกรองข้อมูลเพื่อวิเคราะห์ประสิทธิภาพในการซ่อมบำรุงของไลน์การผลิต</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Troubleshooting Guide -->
+        <div class="help-section">
+            <h2 class="section-title">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.67 2.67 0 0021 17.25l-5.83-5.83m-4.75 4.75l-5.83-5.83M17.25 6.75L21 3m-3.75 3.75a2.67 2.67 0 01-3.75 3.75M3 21l5.83-5.83M12 12h.008v.008H12V12zm0 0h.008v.008H12V12z" /></svg>
+                หากมีปัญหาต้องเข้าไปแก้ตรงไหน (Troubleshooting)
+            </h2>
+            <p>เมื่อพบเจอปัญหาขัดข้องหรือต้องการปรับแก้โปรแกรม คุณสามารถดำเนินการตามขั้นตอนของคู่มือโดยละเอียดดังนี้:</p>
+            
+            <!-- Issue 1: Edit Code on GitHub -->
+            <div class="trouble-item">
+                <div class="trouble-q">หากต้องการปรับแต่งหรือแก้ไขโค้ดการทำงานโปรแกรมซ่อมบำรุง (How to edit the code)</div>
+                <div class="trouble-a">
+                    หากมีความรู้ทางเทคนิคและต้องการเข้าไปแก้ไขโค้ดโปรแกรมของแต่ละหน้าเว็บ สามารถทำได้ด้วยตนเองผ่าน GitHub ตามขั้นตอนต่อไปนี้:
+                    <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                        <li>ล็อกอินและเข้าไปยังคลังเก็บซอร์สโค้ดโปรแกรม (GitHub Repository) ที่นี่: <a href="https://github.com/pm-srab/record-breakdown" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: underline;">https://github.com/pm-srab/record-breakdown</a></li>
+                        <li>เมื่อเข้าลิงก์แล้ว จะพบหน้าต่างรวมไฟล์โปรแกรมระบบซ่อมบำรุงดังรูปภาพประกอบด้านล่างนี้ โดยที่แต่ละหน้าเว็บหลักจะควบคุมแยกผ่านไฟล์ HTML อย่างชัดเจน:</li>
+                    </ol>
+                    
+                    <div style="margin: 15px 0 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <img src="github_repo.png" alt="GitHub Repository Code List" style="width: 100%; display: block; object-fit: contain;">
+                    </div>
+                    
+                    <ol start="3" style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                        <li>คลิกเลือกไฟล์ HTML ที่สอดคล้องกับหน้าเว็บที่ต้องการจะแก้ไข (เช่น เลือก <code>index.html</code> หากต้องการแก้หน้าหลัก)</li>
+                        <li>คลิกที่ไอคอน <b>ดินสอ (Edit this file)</b> บริเวณมุมบนขวา เพื่อเข้าสู่หน้าจอแก้ไขโค้ด (Source Code Editor) ดังรูปภาพด้านล่าง:</li>
+                    </ol>
+                    
+                    <div style="margin: 15px 0 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <img src="github_code.png" alt="GitHub Code Editor Layout" style="width: 100%; display: block; object-fit: contain;">
+                    </div>
+                    
+                    <ol start="5" style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                        <li>เมื่อทำการแก้ไขซอร์สโค้ดเรียบร้อยแล้ว ให้คลิกปุ่มสีเขียว <b>"Commit changes..."</b> ที่บริเวณมุมบนขวาสุดของตัวเว็บ (ดังรูปภาพประกอบด้านล่าง):</li>
+                    </ol>
+
+                    <div style="margin: 15px 0 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <img src="github_commit.png" alt="GitHub Commit Changes Button Layout" style="width: 100%; display: block; object-fit: contain;">
+                    </div>
+
+                    <ol start="6" style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                        <li>เมื่อหน้าต่างยืนยันปรากฏขึ้น ให้กรอกรายละเอียดสั้นๆ แล้วกดปุ่ม **Commit changes** เพื่อบันทึกข้อมูลและให้ระบบอัปเดตออนไลน์แบบ Real-time</li>
+                    </ol>
+                    
+                    <div style="margin-top: 15px; color: #ffaf40; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                        ⚠️ ข้อสำคัญ: หากปัญหาหรือการแก้ไขมีความซับซ้อนเกินกว่าที่จะแก้ไขเองได้ กรุณาโปรดหยุดแก้ไขและติดต่อทีมพัฒนาโปรแกรม (K&A Software House) ด้านล่างทันที
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issue 2: Google Sheets & Sync -->
+            <div class="trouble-item" style="padding-top: 20px;">
+                <div class="trouble-q">โปรแกรมเชื่อมต่อ Google Sheet ไหนบ้าง และถ้าเกิดปัญหาข้อมูลไม่ตรงกัน / ไม่ซิงค์ต้องทำอย่างไร?</div>
+                <div class="trouble-a">
+                    โปรแกรมระบบติดตามงานซ่อมนี้ใช้ Google Sheets ในการจัดเก็บฐานข้อมูลหลักแยกออกจากกันเป็น 2 ไฟล์หลัก เพื่อความปลอดภัยและเป็นระบบ:
+                    
+                    <div style="margin: 15px 0; background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+                        <div style="font-weight: 700; color: var(--text); margin-bottom: 8px; font-size: 14.5px;">📂 รายการเชื่อมฐานข้อมูล Google Sheets (Database Links):</div>
+                        <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                            <li style="margin-bottom: 8px;">
+                                <b>ฐานข้อมูล Dashboard & History (ผลการแจ้งซ่อม)</b>: ใช้เก็บผลงานซ่อม วิเคราะห์ 7 Mean และประวัติแจ้งซ่อมทั้งหมด<br>
+                                🔗 ลิงก์ชีท: <a href="https://docs.google.com/spreadsheets/d/1rg7FW0UHTxUWF2FykxVRvgSrXNGp_fnkRVN15wCtGMQ/edit?gid=0#gid=0" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: underline; word-break: break-all;">Google Sheets - ชีทบันทึกและผลแจ้งซ่อมหลัก</a>
+                            </li>
+                            <li>
+                                <b>ฐานข้อมูล Spare Part (สต็อกคลังอะไหล่)</b>: ใช้เก็บบริหารจัดการยอดอะไหล่และสถิติตัดยอดเบิกจ่ายอะไหล่ในระบบ<br>
+                                🔗 ลิงก์ชีท: <a href="https://docs.google.com/spreadsheets/d/1no86CvAS-mgRQn092E9I_yF3XdH1OsJnOsZEM1mo0Cw/edit?gid=0#gid=0" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: underline; word-break: break-all;">Google Sheets - ชีทบริหารคลังสต็อกและรายการอะไหล่</a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <b>🔄 ขั้นตอนแนะนำในการซิงค์ข้อมูลชุดล่าสุด (Sync & Clear Browser Cache):</b>
+                        <p style="margin: 8px 0 0 0;">หากข้อมูลที่เพิ่งแก้ไขบน Google Sheets หรือผลลัพธ์ในหน้าเบราว์เซอร์ไม่ตรงกัน (Out of Sync):</p>
+                        <ul style="margin: 8px 0; padding-left: 20px; line-height: 1.6;">
+                            <li>สามารถกดคีย์ลัด <code>Ctrl + F5</code> บนหน้าเบราว์เซอร์พร้อมกัน เพื่อรีเซ็ตหน้าเว็บแบบ Hard Reload</li>
+                            <li>หรือคลิกที่ปุ่มสีแดง <b>"ล้างแคชและซิ้งใหม่"</b> บริเวณเมนูด้านซ้ายล่างสุดของตารางแสดงผลในหน้า Dashboard (ดังรูปภาพประกอบด้านล่าง) เพื่อล้างแคชเก่าในหน่วยความจำของหน้าเบราว์เซอร์ และดึงชุดข้อมูลล่าสุดจาก Google Sheet ทันที:</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 15px 0 25px 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <img src="dashboard_cache.png" alt="Dashboard Clear Cache and Force Sync" style="width: 100%; display: block; object-fit: contain;">
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #ffaf40; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                        ⚠️ ข้อสำคัญ: หากทำตามทั้งสองวิธีด้านบนแล้ว ข้อมูลยังคงไม่ตรงกันหรือเป็นข้อขัดข้องเชิงเทคนิคของโค้ดหลัก โปรดติดต่อขอรับความช่วยเหลือจากผู้พัฒนาโปรแกรม (K&A Software House) ด้านล่าง
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Support & Contact -->
+        <div class="help-section">
+            <h2 class="section-title">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+                การช่วยเหลือและติดต่อสอบถาม (Support)
+            </h2>
+            <p>หากมีข้อสงสัยอื่นๆ เพิ่มเติม หรือระบบเกิดความขัดข้องที่ไม่สามารถแก้ไขได้ กรุณาติดต่อทีมผู้พัฒนาโปรแกรม:</p>
+            
+            <div style="display: flex; justify-content: center; margin-top: 30px;">
+                <div class="contact-card" style="max-width: 380px; width: 100%; padding: 35px 25px; background: rgba(0, 123, 255, 0.04); border: 1px solid rgba(0, 123, 255, 0.18); border-radius: 24px; text-align: center; transition: all 0.3s; box-sizing: border-box;">
+                    <img src="kanda_logo.png" alt="K&A Software House Logo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px auto; border: 3px solid var(--primary); box-shadow: 0 8px 25px rgba(0, 123, 255, 0.25); display: block; background: #000;">
+                    <div class="contact-name" style="font-size: 20px; font-weight: 800; margin-bottom: 8px; color: var(--text); letter-spacing: -0.3px;">K&A Software House</div>
+                    <div class="contact-role" style="font-size: 11px; color: var(--text-dim); margin-bottom: 22px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">ผู้พัฒนาซอฟต์แวร์ระบบ</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                        <a href="tel:0947915175" class="contact-link" style="font-size: 14px; color: var(--primary); text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <span>📞 Tel:</span> 094 791 5175
+                        </a>
+                        <a href="mailto:contact@kandaswh.com" class="contact-link" style="font-size: 14px; color: var(--primary); text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <span>✉️ Mail:</span> contact@kandaswh.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

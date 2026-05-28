@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Record Break Down</title> 
+<link rel="icon" type="image/png" href="summit_logo.png">
 <script src="theme.js?v=2"></script> 
 
 <style>
@@ -64,7 +65,7 @@ body {
 .theme-toggle {
     position: absolute;
     top: 14px;
-    right: 14px;
+    left: 14px;
     background: var(--btn-bg);
     border: 1px solid var(--btn-border);
     color: var(--text-main);
@@ -83,6 +84,119 @@ body {
 .theme-toggle:hover {
     background: var(--btn-border);
     transform: rotate(20deg) scale(1.1);
+}
+
+.help-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    color: var(--text-main);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 16px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.help-btn:hover {
+    background: var(--btn-border);
+    transform: scale(1.1);
+}
+
+/* Modal overlay and card styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-card {
+    background: var(--bg);
+    width: 95%;
+    max-width: 480px;
+    border-radius: 24px;
+    padding: 30px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: var(--text-main);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-title {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--text-main);
+}
+
+.help-content {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.help-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.help-content::-webkit-scrollbar-thumb {
+    background: var(--btn-border);
+    border-radius: 10px;
+}
+
+.help-section {
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.help-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.help-section-title svg {
+    width: 18px;
+    height: 18px;
+    color: #007BFF;
+}
+
+.help-section p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 1.5;
 }
 h1 {
     margin-bottom: 8px;
@@ -187,6 +301,9 @@ h3 {
 </div>
 <div class="container">
     <button class="theme-toggle" id="themeBtn" title="Toggle light/dark mode"></button>
+    <a href="help.html" class="help-btn" id="helpBtn" title="Help & System Guide">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </a>
     <h1>Maintenance SRAB</h1>
     <h3>Monitoring System</h3>
     <div class="menu-grid">

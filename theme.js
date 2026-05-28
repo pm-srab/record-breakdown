@@ -41,84 +41,12 @@
     const saved = localStorage.getItem('theme') || 'dark';
     applyTheme(saved);
 
-    // Inject immediate CSS rule to prevent duplicate buttons under any condition
-    const styleRule = document.createElement('style');
-    styleRule.textContent = `
-        body:has(#themeBtn) #_themeBtn,
-        #themeBtn ~ #_themeBtn {
-            display: none !important;
-        }
-    `;
-    document.head.appendChild(styleRule);
-
-    // Bulletproof interval to guarantee the floating button is hidden if an inline button is present
-    setInterval(function() {
-        if (document.getElementById('themeBtn')) {
-            const floatBtn = document.getElementById('_themeBtn');
-            if (floatBtn) {
-                floatBtn.style.setProperty('display', 'none', 'important');
-            }
-        }
-    }, 100);
-
     // Inject button after DOM ready
     document.addEventListener('DOMContentLoaded', function () {
         const inlineBtn = document.getElementById('themeBtn');
-        
         if (inlineBtn) {
-            // Home page: Only use the inline top-right button inside the card.
-            // Do NOT inject the redundant floating button at the bottom-right.
             updateBtn(inlineBtn, saved);
             inlineBtn.onclick = toggleTheme;
-            
-            const floatBtn = document.getElementById('_themeBtn');
-            if (floatBtn) {
-                floatBtn.style.setProperty('display', 'none', 'important');
-            }
-        } else {
-            // Sub-pages: Inject the beautiful floating theme toggle at the bottom-right.
-            const style = document.createElement('style');
-            style.textContent = `
-                #_themeBtn {
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    z-index: 9999;
-                    width: 46px;
-                    height: 46px;
-                    border-radius: 50%;
-                    border: 1px solid rgba(255,255,255,0.15);
-                    background: rgba(30,30,30,0.85);
-                    color: #fff;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    backdrop-filter: blur(10px);
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-                    transition: transform 0.25s, box-shadow 0.25s, background 0.3s;
-                }
-                [data-theme="light"] #_themeBtn {
-                    border-color: rgba(0,0,0,0.12);
-                    background: rgba(255,255,255,0.85);
-                    color: #333;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                }
-                #_themeBtn:hover {
-                    transform: scale(1.12) rotate(15deg);
-                    box-shadow: 0 6px 25px rgba(0,123,255,0.35);
-                }
-            `;
-            document.head.appendChild(style);
-
-            // Double check to prevent injection if themeBtn is present
-            if (!document.getElementById('themeBtn')) {
-                const btn = document.createElement('button');
-                btn.id = '_themeBtn';
-                btn.onclick = toggleTheme;
-                updateBtn(btn, saved);
-                document.body.appendChild(btn);
-            }
         }
     });
 
