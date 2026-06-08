@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Maintenance Records</title>
-    <link rel="icon" type="image/png" href="summit_logo.png">
+    <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="theme.js?v=2"></script>
@@ -1422,7 +1422,7 @@
             }
         }
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+        const SCRIPT_URL = "/api/breakdowns";
 
         function formatDMY(dateStr) {
             if (!dateStr) return "-";
@@ -1653,10 +1653,7 @@
 
         async function deleteRecord(id, btnElement) {
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบข้อมูล:");
-            if (password !== "1234") {
-                if (password !== null) alert("รหัสผ่านไม่ถูกต้อง!");
-                return;
-            }
+            if (password === null) return;
             
             if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
                 
@@ -1669,10 +1666,23 @@
                     // Send delete request to Google Sheets (using URL parameters for better reliability)
                     const deleteUrl = `${SCRIPT_URL}?action=delete&rowIndex=${id}`;
 
-                    await fetch(deleteUrl, {
+                    const response = await fetch(deleteUrl, {
                         method: 'POST',
-                        mode: 'no-cors'
+                        headers: {
+                            'X-Api-Password': password
+                        }
                     });
+
+                    if (response.status === 401) {
+                        alert("รหัสผ่านไม่ถูกต้อง!");
+                        btnElement.disabled = false;
+                        btnElement.innerHTML = originalContent;
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error("ลบข้อมูลไม่สำเร็จ");
+                    }
 
                     // Remove from localStorage
                     let breakdowns = JSON.parse(localStorage.getItem("breakdowns") || "[]");

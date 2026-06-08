@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เบิกอะไหล่ (Spare Part) - Maintenance System</title>
-    <link rel="icon" type="image/png" href="summit_logo.png">
+    <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="theme.js?v=2"></script>
     <style>
         :root {
@@ -932,6 +932,8 @@
                 <select class="select-custom" id="searchType">
                     <option value="name">ชื่ออะไหล่ (Part Name)</option>
                     <option value="model">รุ่น (Model)</option>
+                    <option value="location">ตำแหน่ง (Location)</option>
+                    <option value="brand">ยี่ห้อ (Brand Name)</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -1110,7 +1112,7 @@
     </div>
 
     <script>
-        const SPARE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-s4hRzbMOI54WXJEh1KAJR547qVVF2OWcR0uDFtOQTTJVbHdGZMTgS7FS6Pm3Jmjb/exec";
+        const SPARE_SCRIPT_URL = "/api/spareparts";
 
         let spareParts = [];
         let filteredParts = [];
@@ -1249,9 +1251,14 @@
                 if (!searchInput) return true;
                 if (searchType === 'name') {
                     return String(part.name || '').toLowerCase().includes(searchInput);
-                } else {
+                } else if (searchType === 'model') {
                     return String(part.model || '').toLowerCase().includes(searchInput);
+                } else if (searchType === 'location') {
+                    return String(part.location || '').toLowerCase().includes(searchInput);
+                } else if (searchType === 'brand') {
+                    return String(part.brand || '').toLowerCase().includes(searchInput);
                 }
+                return false;
             });
 
             currentPage = 1;
@@ -1806,6 +1813,36 @@
             }
         }
 
+        // Send low stock email alert when stock reaches 2 or fewer.
+        async function sendLowStockEmailAlert(part, stockLevel) {
+            if (stockLevel <= 2) {
+                console.log(`[Low Stock Email Alert Triggered] Part: ${part.name}, Model: ${part.model}, Stock: ${stockLevel}`);
+                
+                const targetEmailAddress = "atherman2549@gmail.com"; 
+
+                // Send email request to Google Apps Script Web App
+                try {
+                    await fetch(SPARE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Prevents CORS errors caused by Google script redirects
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'sendLowStockEmail',
+                            email: targetEmailAddress,
+                            partName: part.name,
+                            model: part.model || '-',
+                            brand: part.brand || '-',
+                            location: part.location || '-',
+                            stock: stockLevel
+                        })
+                    });
+                    console.log("[Email Alert] Low stock email alert request sent to Google Apps Script.");
+                } catch (error) {
+                    console.error("Error sending low stock email:", error);
+                }
+            }
+        }
+
         async function saveStock() {
             const name = document.getElementById('modalPartName').innerText;
             const newStock = parseInt(document.getElementById('modalStock').value);
@@ -1818,10 +1855,6 @@
             // Verify Password before updating
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึก stock (Password):");
             if (password === null) return; // User cancelled
-            if (password !== "1234") {
-                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึก stock ได้");
-                return;
-            }
 
             const saveStockBtn = document.querySelector('.btn-save-stock');
             const originalText = saveStockBtn.innerText;
@@ -1835,12 +1868,23 @@
                 formData.append('rowNumber', activeRowNumber);
                 formData.append('stock', newStock);
 
-                await fetch(SPARE_SCRIPT_URL, {
+                const response = await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Api-Password': password
+                    },
                     body: formData.toString()
                 });
+
+                if (response.status === 401) {
+                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึก stock ได้");
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+                }
 
                 // 2. Update stock level in local memory and cache
                 const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
@@ -1854,6 +1898,9 @@
                     
                     spareParts[index].edit = timestamp;
                     localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+
+                    // Trigger low stock email alert
+                    sendLowStockEmailAlert(spareParts[index], newStock);
                 }
 
                 alert(`บันทึก stock ${name}\nจำนวน: ${newStock} ชิ้น\nเรียบร้อยแล้ว!`);
@@ -1889,10 +1936,6 @@
             // Verify Password before updating
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึกการเบิก (Password):");
             if (password === null) return; // User cancelled
-            if (password !== "1234") {
-                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
-                return;
-            }
 
             const saveBtn = document.querySelector('.btn-save');
             const originalText = saveBtn.innerText;
@@ -1909,12 +1952,23 @@
                 formData.append('date', date);
                 formData.append('detail', detail);
 
-                await fetch(SPARE_SCRIPT_URL, {
+                const response = await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Api-Password': password
+                    },
                     body: formData.toString()
                 });
+
+                if (response.status === 401) {
+                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+                }
 
                 // 2. Decrement stock level in local memory and cache
                 const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
@@ -1928,6 +1982,9 @@
                     
                     spareParts[index].edit = timestamp;
                     localStorage.setItem("spare_parts", JSON.stringify(spareParts));
+
+                    // Trigger low stock email alert
+                    sendLowStockEmailAlert(spareParts[index], spareParts[index].stock);
                 }
 
                 alert(`บันทึกการเบิก ${name}\nจำนวน: ${usageQty} ชิ้น\nเรียบร้อยแล้ว!`);
@@ -1946,10 +2003,6 @@
         async function deleteHistoryRecord(rowNumber) {
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบประวัติการเบิก (Password):");
             if (password === null) return; // User cancelled
-            if (password !== "1234") {
-                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
-                return;
-            }
 
             if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการประวัติการเบิกนี้ออกจากระบบถาวร?")) {
                 return;
@@ -1963,12 +2016,25 @@
                 formData.append('action', 'deleteHistory');
                 formData.append('rowNumber', rowNumber);
 
-                await fetch(SPARE_SCRIPT_URL, {
+                const response = await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Api-Password': password
+                    },
                     body: formData.toString()
                 });
+
+                if (response.status === 401) {
+                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
+                    // Reload clean history data in the modal
+                    await openGlobalHistoryModal();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error("ลบข้อมูลไม่สำเร็จ");
+                }
 
                 alert("ลบประวัติสำเร็จและคืนสต็อกอะไหล่เรียบร้อยแล้ว!");
                 // Reload clean history data in the modal

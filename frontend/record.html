@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Record Break Down</title>
-    <link rel="icon" type="image/png" href="summit_logo.png">
+    <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="theme.js?v=2"></script>
     <style>
         :root {
@@ -459,7 +459,7 @@
             this.value = this.value.toUpperCase();
         });
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
+        const SCRIPT_URL = "/api/breakdowns";
 
         function setupTimeInput(id) {
             const el = document.getElementById(id);
