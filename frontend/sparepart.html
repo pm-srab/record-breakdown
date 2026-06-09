@@ -211,7 +211,7 @@
     </div>
 
     <script>
-        const SPARE_SCRIPT_URL = "/api/spareparts";
+        const SPARE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-s4hRzbMOI54WXJEh1KAJR547qVVF2OWcR0uDFtOQTTJVbHdGZMTgS7FS6Pm3Jmjb/exec";
 
         let spareParts = [];
         let filteredParts = [];
@@ -954,6 +954,10 @@
             // Verify Password before updating
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึก stock (Password):");
             if (password === null) return; // User cancelled
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึก stock ได้");
+                return;
+            }
 
             const saveStockBtn = document.querySelector('.btn-save-stock');
             const originalText = saveStockBtn.innerText;
@@ -967,23 +971,14 @@
                 formData.append('rowNumber', activeRowNumber);
                 formData.append('stock', newStock);
 
-                const response = await fetch(SPARE_SCRIPT_URL, {
+                await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Api-Password': password
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: formData.toString()
                 });
-
-                if (response.status === 401) {
-                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึก stock ได้");
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error("บันทึกข้อมูลไม่สำเร็จ");
-                }
 
                 // 2. Update stock level in local memory and cache
                 const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
@@ -1035,6 +1030,10 @@
             // Verify Password before updating
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึกการเบิก (Password):");
             if (password === null) return; // User cancelled
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
+                return;
+            }
 
             const saveBtn = document.querySelector('.btn-save');
             const originalText = saveBtn.innerText;
@@ -1051,23 +1050,14 @@
                 formData.append('date', date);
                 formData.append('detail', detail);
 
-                const response = await fetch(SPARE_SCRIPT_URL, {
+                await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Api-Password': password
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: formData.toString()
                 });
-
-                if (response.status === 401) {
-                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error("บันทึกข้อมูลไม่สำเร็จ");
-                }
 
                 // 2. Decrement stock level in local memory and cache
                 const index = spareParts.findIndex(p => p.rowNumber === activeRowNumber);
@@ -1102,6 +1092,10 @@
         async function deleteHistoryRecord(rowNumber) {
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบประวัติการเบิก (Password):");
             if (password === null) return; // User cancelled
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
+                return;
+            }
 
             if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการประวัติการเบิกนี้ออกจากระบบถาวร?")) {
                 return;
@@ -1115,25 +1109,14 @@
                 formData.append('action', 'deleteHistory');
                 formData.append('rowNumber', rowNumber);
 
-                const response = await fetch(SPARE_SCRIPT_URL, {
+                await fetch(SPARE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Api-Password': password
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: formData.toString()
                 });
-
-                if (response.status === 401) {
-                    alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
-                    // Reload clean history data in the modal
-                    await openGlobalHistoryModal();
-                    return;
-                }
-
-                if (!response.ok) {
-                    throw new Error("ลบข้อมูลไม่สำเร็จ");
-                }
 
                 alert("ลบประวัติสำเร็จและคืนสต็อกอะไหล่เรียบร้อยแล้ว!");
                 // Reload clean history data in the modal

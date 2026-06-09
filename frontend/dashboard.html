@@ -372,7 +372,7 @@
             }
         }
 
-        const SCRIPT_URL = "/api/breakdowns";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
 
         function formatDMY(dateStr) {
             if (!dateStr) return "-";
@@ -605,6 +605,11 @@
             const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบข้อมูล:");
             if (password === null) return;
             
+            if (password !== "1234") {
+                alert("รหัสผ่านไม่ถูกต้อง!");
+                return;
+            }
+            
             if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
                 
                 // Show loading state
@@ -616,23 +621,10 @@
                     // Send delete request to Google Sheets (using URL parameters for better reliability)
                     const deleteUrl = `${SCRIPT_URL}?action=delete&rowIndex=${id}`;
 
-                    const response = await fetch(deleteUrl, {
+                    await fetch(deleteUrl, {
                         method: 'POST',
-                        headers: {
-                            'X-Api-Password': password
-                        }
+                        mode: 'no-cors'
                     });
-
-                    if (response.status === 401) {
-                        alert("รหัสผ่านไม่ถูกต้อง!");
-                        btnElement.disabled = false;
-                        btnElement.innerHTML = originalContent;
-                        return;
-                    }
-
-                    if (!response.ok) {
-                        throw new Error("ลบข้อมูลไม่สำเร็จ");
-                    }
 
                     // Remove from localStorage
                     let breakdowns = JSON.parse(localStorage.getItem("breakdowns") || "[]");
