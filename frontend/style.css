@@ -31,6 +31,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+input[type="date"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
 
 /* ==========================================
    Styles for index.html
@@ -1443,6 +1448,9 @@ body.page-dashboard {
                     height: auto !important;
                     min-height: 100vh;
                     display: block !important; /* Back to block for simplest mobile layout */
+                    overflow-y: auto !important; /* Allow vertical scroll on mobile */
+                    overflow-x: hidden !important; /* Prevent horizontal scroll on mobile */
+                    overscroll-behavior-y: auto !important; /* Allow normal scrolling physics */
                 }
                 .sidebar {
                     position: fixed;
@@ -1464,6 +1472,7 @@ body.page-dashboard {
                     max-width: 100% !important;
                     padding: 15px 15px 80px 15px !important;
                     box-sizing: border-box !important;
+                    overflow: visible !important; /* Prevent double scrollbar, expand height fully */
                 }
                 .header {
                     display: flex;
