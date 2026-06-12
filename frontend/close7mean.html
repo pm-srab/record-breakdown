@@ -189,6 +189,7 @@
                             time: row[3], finishDate: row[4], finishTime: row[5], duration: row[6], department: row[7],
                             factory: row[8], problem: row[9], solution: row[10], sparePart: row[11], sevenMean: row[12],
                             sheetName: row[13] || "", // Map sheetName from Column N (index 13)
+                            sheetRow: row[14] || (originalIndex + 1), // Map sheetRow from Column O (index 14)
                             id: originalIndex // This is the real row index in the sheet!
                         }))
                         .filter((r, idx) => {
@@ -401,6 +402,7 @@
                 const formData = new URLSearchParams();
                 formData.append('action', 'update');
                 formData.append('rowIndex', id);
+                formData.append('sheetRow', record ? record.sheetRow : "");
                 formData.append('sheetName', sheetName);
                 formData.append('finishDate', finishDate);
                 formData.append('finishTime', finishTime);
@@ -467,6 +469,7 @@
                 const formData = new URLSearchParams();
                 formData.append('action', 'update');
                 formData.append('rowIndex', id);
+                formData.append('sheetRow', record ? record.sheetRow : "");
                 formData.append('sheetName', sheetName);
                 formData.append('sevenMean', val);
 
