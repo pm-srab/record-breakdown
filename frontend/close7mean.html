@@ -6,6 +6,7 @@
     <title>ปิดรหัส 7 mean - Maintenance Records</title>
     <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="theme.js?v=2"></script>
+    <script src="shared.js?v=1"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-close7mean">
@@ -37,110 +38,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
-
-        function formatDMY(dateStr) {
-            if (!dateStr) return "-";
-            const str = String(dateStr).replace(/^'/, '');
-            
-            // 1. ISO YYYY-MM-DD
-            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) {
-                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-            }
-
-            // 2. Strict DD/MM/YYYY (handles our new save format with optional time)
-            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})(.*)$/);
-            if (strictDmyMatch) {
-                return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}${strictDmyMatch[4]}`;
-            }
-            
-            // 3. Try Date object (handles legacy M/D/Y data without leading zeros)
-            try {
-                const d = new Date(dateStr);
-                if (!isNaN(d.getTime())) {
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const year = d.getFullYear();
-                    return `${day}/${month}/${year}`;
-                }
-            } catch (e) {}
-
-            // 3. Fallback explicitly to D/M/Y if Date parsing failed (e.g. 30/12/2026)
-            const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-            if (dmyMatch) {
-                let d = dmyMatch[1].padStart(2, '0');
-                let m = dmyMatch[2].padStart(2, '0');
-                let y = dmyMatch[3];
-                if (y.length === 2) y = "20" + y;
-                return `${d}/${m}/${y}`;
-            }
-
-            return dateStr;
-        }
-
-        function formatTimeOnly(timeStr) {
-            if (!timeStr) return "-";
-            const str = String(timeStr);
-            
-            // If it's a full ISO string or contains date info, use Date object for local time
-            if (str.includes('T') || str.includes('-')) {
-                try {
-                    const d = new Date(str);
-                    if (!isNaN(d.getTime())) {
-                        const hours = String(d.getHours()).padStart(2, '0');
-                        const minutes = String(d.getMinutes()).padStart(2, '0');
-                        return `${hours}:${minutes}`;
-                    }
-                } catch (e) {}
-            }
-            
-            // Fallback to simple regex for HH:mm
-            const simpleTimeMatch = str.match(/^(\d{1,2}:\d{2})/);
-            if (simpleTimeMatch) return simpleTimeMatch[1];
-            
-            return timeStr;
-        }
-
-        function extractDateOnly(dateStr) {
-            if (!dateStr) return "";
-            const str = String(dateStr).trim();
-            
-            // Match dd/MM/yyyy
-            const match = str.match(/^'?(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-            if (match) {
-                return `${match[1].padStart(2, '0')}/${match[2].padStart(2, '0')}/${match[3]}`;
-            }
-            
-            // ISO YYYY-MM-DD
-            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) {
-                return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-            }
-            
-            return dateStr;
-        }
-
-        function getBreakdownDateTime(record) {
-            if (!record.time) return "-";
-            const timeStr = String(record.time);
-            
-            // If it already contains a date (new entry)
-            if (timeStr.includes('/')) {
-                return timeStr.startsWith("'") ? timeStr.slice(1) : timeStr;
-            }
-            
-            // Legacy fallback: combine date part and time part
-            const dOnly = extractDateOnly(record.date);
-            const tOnly = formatTimeOnly(record.time);
-            return `${dOnly} ${tOnly}`;
-        }
-
-        function getRecordDateTime(record) {
-            if (!record.date) return "-";
-            const str = String(record.date);
-            return str.startsWith("'") ? str.slice(1) : str;
-        }
+        // Utility functions are now loaded globally from shared.js
 
         let currentTab = 'sevenMean';
         let currentDept = 'All';
@@ -168,10 +66,7 @@
             try {
                 const data = localStorage.getItem("breakdowns");
                 if (data) {
-                    breakdowns = JSON.parse(data).filter(r => {
-                        const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
-                        return !isHeader;
-                    });
+                    breakdowns = JSON.parse(data);
                 }
             } catch (err) { console.error(err); }
 
@@ -179,27 +74,8 @@
 
             // 2. Fetch fresh data from Google Sheets
             try {
-                const response = await fetch(SCRIPT_URL);
-                const googleData = await response.json();
-                if (googleData && Array.isArray(googleData)) {
-                    // Map with original index from googleData to ensure correct row update
-                    const cloudBreakdowns = googleData
-                        .map((row, originalIndex) => ({
-                            date: row[0], line: row[1], machineId: row[2], caseCount: 1,
-                            time: row[3], finishDate: row[4], finishTime: row[5], duration: row[6], department: row[7],
-                            factory: row[8], problem: row[9], solution: row[10], sparePart: row[11], sevenMean: row[12],
-                            sheetName: row[13] || "", // Map sheetName from Column N (index 13)
-                            sheetRow: row[14] || (originalIndex + 1), // Map sheetRow from Column O (index 14)
-                            id: originalIndex // This is the real row index in the sheet!
-                        }))
-                        .filter((r, idx) => {
-                            const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
-                            return idx > 0 && r.date && r.machineId && !isHeader;
-                        }); // Skip header and empty rows
-
-                    localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
-                    renderByTab(cloudBreakdowns, list);
-                }
+                const cloudBreakdowns = await fetchAndCacheBreakdowns();
+                renderByTab(cloudBreakdowns, list);
             } catch (e) { console.error("Fetch error:", e); }
         }
 
@@ -325,15 +201,7 @@
             });
         }
 
-        function setupTimeInput(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('input', function(e) {
-                let val = e.target.value.replace(/\D/g, '');
-                if (val.length > 2) val = val.slice(0, 2) + ":" + val.slice(2, 4);
-                e.target.value = val;
-            });
-        }
+        // setupTimeInput is now loaded from shared.js
 
         async function closePendingWork(id, btn) {
             const rawFinishDate = document.getElementById(`finishDate-${id}`).value;

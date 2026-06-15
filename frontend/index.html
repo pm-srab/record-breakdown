@@ -6,6 +6,7 @@
 <title>Record Break Down</title> 
 <link rel="icon" type="image/png" href="static/summit_logo.png">
 <script src="theme.js?v=2"></script> 
+<script src="shared.js?v=1"></script> 
 
 <link rel="stylesheet" href="style.css"> 
 </head> 
@@ -49,56 +50,22 @@
 <script>
 
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
-
     async function checkPending() {
-        const noti = document.getElementById('pendingNoti');
-        
         // 1. First check local storage for immediate display
         const localData = localStorage.getItem("breakdowns");
         if (localData) {
-            const breakdowns = JSON.parse(localData).filter(r => {
-                const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
-                return !isHeader;
-            });
-            renderNoti(breakdowns);
+            try {
+                const breakdowns = JSON.parse(localData);
+                renderNoti(breakdowns);
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         // 2. Fetch fresh data from Google Sheets in background
         try {
-            const response = await fetch(SCRIPT_URL);
-            const googleData = await response.json();
-            
-            if (googleData && Array.isArray(googleData)) {
-                // Map with original index from googleData to ensure correct row tracking
-                const cloudBreakdowns = googleData
-                    .map((row, originalIndex) => ({
-                        date: row[0],
-                        line: row[1],
-                        machineId: row[2],
-                        caseCount: 1,
-                        time: row[3],
-                        finishDate: row[4],
-                        finishTime: row[5],
-                        duration: row[6],
-                        department: row[7],
-                        factory: row[8],
-                        problem: row[9],
-                        solution: row[10],
-                        sparePart: row[11],
-                        sevenMean: row[12],
-                        sheetName: row[13] || "", // Map sheetName from Column N (index 13)
-                        sheetRow: row[14] || (originalIndex + 1), // Map sheetRow from Column O (index 14)
-                        id: originalIndex // This is the real row index in the sheet!
-                    }))
-                    .filter((r, idx) => {
-                        const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
-                        return idx > 0 && r.date && r.machineId && !isHeader;
-                    }); // Skip header and empty rows
-                
-                localStorage.setItem("breakdowns", JSON.stringify(cloudBreakdowns));
-                renderNoti(cloudBreakdowns);
-            }
+            const cloudBreakdowns = await fetchAndCacheBreakdowns();
+            renderNoti(cloudBreakdowns);
         } catch (e) {
             console.error("Error fetching from Google Sheets:", e);
         }

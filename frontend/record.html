@@ -6,6 +6,7 @@
     <title>Record Break Down</title>
     <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="theme.js?v=2"></script>
+    <script src="shared.js?v=1"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-record">
@@ -101,43 +102,7 @@
             this.value = this.value.toUpperCase();
         });
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
-
-        function setupTimeInput(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('input', function(e) {
-                const originalValue = e.target.value;
-                const originalCursor = e.target.selectionStart;
-                
-                let digits = originalValue.replace(/\D/g, '');
-                let formatted = '';
-
-                if (digits.length > 2) {
-                    let hh = digits.slice(0, 2);
-                    let mm = digits.slice(2, 4);
-                    if (parseInt(hh) > 23) hh = '23';
-                    if (parseInt(mm) > 59) mm = '59';
-                    formatted = hh + ":" + mm;
-                } else if (digits.length > 0) {
-                    let hh = digits;
-                    if (parseInt(hh) > 23) hh = '23';
-                    formatted = hh;
-                }
-
-                if (originalValue !== formatted) {
-                    e.target.value = formatted;
-                    // Fix cursor position
-                    let newCursor = originalCursor;
-                    if (formatted.length > originalValue.length && originalCursor === 3) {
-                        newCursor = 4;
-                    } else if (formatted.length < originalValue.length && originalCursor === 3) {
-                        newCursor = 2;
-                    }
-                    e.target.setSelectionRange(newCursor, newCursor);
-                }
-            });
-        }
+        // SCRIPT_URL and setupTimeInput are now loaded from shared.js
         
         setupTimeInput('p_breakdownTime');
 

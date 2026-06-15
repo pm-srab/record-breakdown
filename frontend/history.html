@@ -6,6 +6,7 @@
     <title>Maintenance History - SRAB</title>
     <link rel="icon" type="image/png" href="static/summit_logo.png">
     <script src="theme.js?v=2"></script>
+    <script src="shared.js?v=1"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-history">
@@ -38,7 +39,6 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
         let allRecords = [];
 
         async function init() {
@@ -70,38 +70,8 @@
             // Fetch fresh data
             loading.style.display = 'block';
             try {
-                const response = await fetch(SCRIPT_URL);
-                const googleData = await response.json();
-                
-                if (googleData && Array.isArray(googleData)) {
-                    allRecords = googleData
-                        .map((row, originalIndex) => ({
-                            date: row[0],
-                            line: row[1],
-                            machineId: row[2],
-                            caseCount: 1,
-                            time: row[3],
-                            finishDate: row[4],
-                            finishTime: row[5],
-                            duration: row[6],
-                            department: row[7],
-                            factory: row[8],
-                            problem: row[9],
-                            solution: row[10],
-                            sparePart: row[11],
-                            sevenMean: row[12],
-                            sheetName: row[13] || "",
-                            sheetRow: row[14] || (originalIndex + 1),
-                            id: originalIndex
-                        }))
-                        .filter((r, idx) => {
-                            const isHeader = String(r.date).includes("วันที่") || String(r.machineId).includes("เครื่องจักร");
-                            return idx > 0 && r.date && r.machineId && !isHeader;
-                        });
-                    
-                    localStorage.setItem("breakdowns", JSON.stringify(allRecords));
-                    renderRecords(allRecords);
-                }
+                allRecords = await fetchAndCacheBreakdowns();
+                renderRecords(allRecords);
             } catch (err) {
                 console.error("Fetch error:", err);
             } finally {
@@ -212,46 +182,7 @@
             `}).join('');
         }
 
-        function formatDMY(dateStr) {
-            if (!dateStr) return "-";
-            const str = String(dateStr).replace(/^'/, '');
-            
-            const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-
-            const strictDmyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})(.*)$/);
-            if (strictDmyMatch) return `${strictDmyMatch[1]}/${strictDmyMatch[2]}/${strictDmyMatch[3]}`;
-            
-            const dmyMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-            if (dmyMatch) {
-                let d = dmyMatch[1].padStart(2, '0');
-                let m = dmyMatch[2].padStart(2, '0');
-                let y = dmyMatch[3];
-                if (y.length === 2) y = "20" + y;
-                return `${d}/${m}/${y}`;
-            }
-
-            return dateStr;
-        }
-
-        function formatTimeOnly(timeStr) {
-            if (!timeStr || timeStr === "-") return "-";
-            const str = String(timeStr);
-            
-            if (str.includes('T') || str.includes('-')) {
-                try {
-                    const d = new Date(str);
-                    if (!isNaN(d.getTime())) {
-                        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    }
-                } catch (e) {}
-            }
-            
-            const simpleTimeMatch = str.match(/^(\d{1,2}:\d{2})/);
-            if (simpleTimeMatch) return simpleTimeMatch[1];
-            
-            return timeStr;
-        }
+        // formatDMY and formatTimeOnly are now loaded from shared.js
 
         function toggleDetail(i) {
             const detail = document.getElementById(`detail-${i}`);
