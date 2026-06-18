@@ -3,7 +3,7 @@
 
 // 1. Centralized API Config (Google Apps Script Web App URLs)
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYPLqS7Xaiyc9Ev5GoMZoOEkndOVXtASyrsqu2n9GvLyusKXa0pKdoxb4FO6vrAUYgkw/exec";
-const SPARE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-s4hRzbMOI54WXJEh1KAJR547qVVF2OWcR0uDFtOQTTJVbHdGZMTgS7FS6Pm3Jmjb/exec";
+const SPARE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaBgLFySGpShaziU7xOb8Y6Iy28DmKkO3X19Ww_8wodZI6hktRCRjEVJWO2LQMK7o/exec";
 
 // 2. Date & Time Parsing & Formatting Helpers
 function formatDMY(dateStr) {
