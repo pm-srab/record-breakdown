@@ -447,8 +447,8 @@
             }
         }
 
-        function forceReset() {
-            if (confirm("ต้องการล้างข้อมูลเก่าและซิงค์ใหม่จาก Cloud หรือไม่?")) {
+        async function forceReset() {
+            if (await customConfirm("ต้องการล้างข้อมูลเก่าและซิงค์ใหม่จาก Cloud หรือไม่?")) {
                 localStorage.removeItem("breakdowns");
                 location.reload();
             }
@@ -513,7 +513,7 @@
         }
 
         async function deleteRecord(id, btnElement) {
-            const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบข้อมูล:");
+            const password = await customPasswordPrompt("กรุณากรอกรหัสผ่านเพื่อลบข้อมูล:");
             if (password === null) return;
             
             if (password !== "1234") {
@@ -521,7 +521,7 @@
                 return;
             }
             
-            if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
+            if (await customConfirm("คุณต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจาก Google Sheet ด้วย)")) {
                 
                 // Show loading state
                 const originalContent = btnElement.innerHTML;
@@ -556,8 +556,8 @@
             }
         }
 
-        function clearRecords() {
-            if (confirm("คุณต้องการล้างข้อมูลบันทึกทั้งหมดใช่หรือไม่?")) {
+        async function clearRecords() {
+            if (await customConfirm("คุณต้องการล้างข้อมูลบันทึกทั้งหมดใช่หรือไม่?")) {
                 localStorage.removeItem("breakdowns");
                 loadRecords();
             }
@@ -1427,7 +1427,16 @@
                 if (currentVal && (sortedMonths.includes(currentVal) || (withAllOption && currentVal === 'all'))) {
                     el.value = currentVal;
                 } else if (withAllOption) {
-                    el.value = 'all';
+                    const now = new Date();
+                    const m1 = `${now.getMonth() + 1}/${now.getFullYear()}`;
+                    const m2 = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+                    const matchedMonth = sortedMonths.find(m => m === m1 || m === m2);
+
+                    if (id === 'overallMonthSelect' && matchedMonth) {
+                        el.value = matchedMonth;
+                    } else {
+                        el.value = 'all';
+                    }
                 } else if (idx === 2 && sortedMonths.length > 1) {
                     el.value = sortedMonths[1]; // Default second month for comparison
                 }

@@ -837,7 +837,7 @@
 
         async function deletePartPhoto() {
             // Confirm from user
-            const confirmed = confirm("คุณต้องการลบรูปภาพของอะไหล่นี้ใช่หรือไม่?");
+            const confirmed = await customConfirm("คุณต้องการลบรูปภาพของอะไหล่นี้ใช่หรือไม่?");
             if (!confirmed) return;
 
             const photoContainer = document.getElementById('modalPhotoContainer');
@@ -932,7 +932,7 @@
             }
 
             // Verify Password before updating
-            const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึก stock (Password):");
+            const password = await customPasswordPrompt("กรุณากรอกรหัสผ่านเพื่อบันทึก stock (Password):");
             if (password === null) return; // User cancelled
             if (password !== "1234") {
                 alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึก stock ได้");
@@ -1008,7 +1008,7 @@
             }
 
             // Verify Password before updating
-            const password = prompt("กรุณากรอกรหัสผ่านเพื่อบันทึกการเบิก (Password):");
+            const password = await customPasswordPrompt("กรุณากรอกรหัสผ่านเพื่อบันทึกการเบิก (Password):");
             if (password === null) return; // User cancelled
             if (password !== "1234") {
                 alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถบันทึกการเบิกได้");
@@ -1070,14 +1070,14 @@
         }
 
         async function deleteHistoryRecord(rowNumber) {
-            const password = prompt("กรุณากรอกรหัสผ่านเพื่อลบประวัติการเบิก (Password):");
+            const password = await customPasswordPrompt("กรุณากรอกรหัสผ่านเพื่อลบประวัติการเบิก (Password):");
             if (password === null) return; // User cancelled
             if (password !== "1234") {
                 alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้");
                 return;
             }
 
-            if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการประวัติการเบิกนี้ออกจากระบบถาวร?")) {
+            if (!await customConfirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการประวัติการเบิกนี้ออกจากระบบถาวร?")) {
                 return;
             }
 
