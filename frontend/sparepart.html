@@ -211,6 +211,14 @@
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
+    <div class="modal-overlay" id="imagePreviewModal" style="display: none; z-index: 5000; padding: 10px;">
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 98%; max-height: 98vh; animation: modalFadeIn 0.3s ease-out;">
+            <img id="previewModalImg" src="" alt="Preview Image" style="max-width: 98vw; max-height: 88vh; border-radius: 16px; border: 2px solid rgba(255, 255, 255, 0.2); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); object-fit: contain;">
+            <button class="btn-modal btn-cancel" onclick="closeImagePreviewModal()" style="margin-top: 15px; min-width: 180px; padding: 12px 24px; font-size: 15px; font-weight: 700; border-radius: 10px;">ปิด (Close)</button>
+        </div>
+    </div>
+
     <script>
         // SPARE_SCRIPT_URL is now loaded from shared.js
 
@@ -231,7 +239,7 @@
             if (photoUrl && (photoUrl.startsWith('http') || photoUrl.startsWith('data:image') || photoUrl.includes('.'))) {
                 return `
                     <div class="part-photo-container">
-                        <img src="${photoUrl}" alt="${part.name}" class="part-photo-img" onerror="this.outerHTML=getPartPlaceholderHTML('${part.name.replace(/'/g, "\\'")}')" />
+                        <img src="${photoUrl}" alt="${part.name}" class="part-photo-img" onerror="this.outerHTML=getPartPlaceholderHTML('${part.name.replace(/'/g, "\\'")}')" onclick="enlargePhoto(event, this.src)" style="cursor: pointer;" />
                     </div>
                 `;
             }
@@ -676,6 +684,23 @@
             document.getElementById('historyModal').style.display = 'none';
         }
 
+        function enlargePhoto(event, src) {
+            if (event) event.stopPropagation();
+            const modal = document.getElementById('imagePreviewModal');
+            const img = document.getElementById('previewModalImg');
+            if (modal && img) {
+                img.src = src;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeImagePreviewModal() {
+            const modal = document.getElementById('imagePreviewModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         function openEditModal(name, model, stock, location, rowNumber) {
             activeRowNumber = rowNumber;
             activePartStock = stock;
@@ -1115,10 +1140,19 @@
             const editModal = document.getElementById('editModal');
             const historyModal = document.getElementById('historyModal');
             const uploadModal = document.getElementById('uploadModal');
+            const imagePreviewModal = document.getElementById('imagePreviewModal');
             if (event.target == editModal) closeEditModal();
             if (event.target == historyModal) closeHistoryModal();
             if (event.target == uploadModal) closeUploadModal();
+            if (event.target == imagePreviewModal) closeImagePreviewModal();
         }
+
+        // Close preview modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeImagePreviewModal();
+            }
+        });
 
         // Bind Search events
         document.getElementById('searchInput').addEventListener('input', filterParts);
