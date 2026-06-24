@@ -41,19 +41,16 @@ input[type="date"] {
    Styles for index.html
    ========================================== */
 body.page-index {
-
-    & {
-        --bg: #1a1a1a;
-        --card-bg: rgba(255,255,255,0.03);
-        --card-border: rgba(255,255,255,0.05);
-        --text-main: #ffffff;
-        --text-sub: #888;
-        --btn-bg: rgba(255,255,255,0.05);
-        --btn-border: rgba(255,255,255,0.1);
-        --btn-color: white;
-        --shadow: 0 20px 50px rgba(0,0,0,0.4);
-        transition: background-color 0.3s, color 0.3s;
-    }
+    --bg: #1a1a1a;
+    --card-bg: rgba(255,255,255,0.03);
+    --card-border: rgba(255,255,255,0.05);
+    --text-main: #ffffff;
+    --text-sub: #888;
+    --btn-bg: rgba(255,255,255,0.05);
+    --btn-border: rgba(255,255,255,0.1);
+    --btn-color: white;
+    --shadow: 0 20px 50px rgba(0,0,0,0.4);
+    transition: background-color 0.3s, color 0.3s;
 
     [data-theme="light"] & {
         --bg: #f0f2f5;
@@ -70,18 +67,18 @@ body.page-index {
     * {
         box-sizing: border-box;
     }
-    & { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--bg);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        color: var(--text-main);
-        transition: background-color 0.3s, color 0.3s;
-    }
+    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
+
     .container {
         text-align: center;
         width: 100%;
@@ -331,59 +328,55 @@ body.page-index {
    Styles for close7mean.html
    ========================================== */
 body.page-close7mean {
+    --bg: #1a1a1a;
+    --card-bg: #1f3050;
+    --text-main: #ffffff;
+    --text-dim: #bbbbbb;
+    --border: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(255, 255, 255, 0.1);
+    --problem-bg: rgba(255, 255, 255, 0.03);
+    --problem-label: #ffcc00;
+    --problem-text: #ffffff;
+    --machine-color: #00ffcc;
+    --time-color: #ff9f43;
+    --time-rec-color: #5dade2;
+    --closing-form-bg: rgba(0, 0, 0, 0.2);
 
-            & {
-                --bg: #1a1a1a;
-                --card-bg: #1f3050;
-                --text-main: #ffffff;
-                --text-dim: #bbbbbb;
-                --border: rgba(255, 255, 255, 0.1);
-                --input-bg: rgba(255, 255, 255, 0.05);
-                --input-border: rgba(255, 255, 255, 0.1);
-                --problem-bg: rgba(255, 255, 255, 0.03);
-                --problem-label: #ffcc00;
-                --problem-text: #ffffff;
-                --machine-color: #00ffcc;
-                --time-color: #ff9f43;
-                --time-rec-color: #5dade2;
-                --closing-form-bg: rgba(0, 0, 0, 0.2);
-            }
+    [data-theme="light"] & {
+        --bg: #f0f2f5;
+        --card-bg: #ffffff;
+        --text-main: #1c1e21;
+        --text-dim: #555555;
+        --border: rgba(0, 0, 0, 0.1);
+        --input-bg: rgba(0, 0, 0, 0.03);
+        --input-border: rgba(0, 0, 0, 0.12);
+        --problem-bg: rgba(0, 0, 0, 0.03);
+        --problem-label: #d97706; /* Darker orange/amber for contrast */
+        --problem-text: #1c1e21;
+        --machine-color: #0d9488; /* Dark teal for high contrast */
+        --time-color: #ea580c; /* High contrast orange */
+        --time-rec-color: #0284c7; /* High contrast blue */
+        --closing-form-bg: rgba(0, 0, 0, 0.03);
+    }
 
-            [data-theme="light"] & {
-                --bg: #f0f2f5;
-                --card-bg: #ffffff;
-                --text-main: #1c1e21;
-                --text-dim: #555555;
-                --border: rgba(0, 0, 0, 0.1);
-                --input-bg: rgba(0, 0, 0, 0.03);
-                --input-border: rgba(0, 0, 0, 0.12);
-                --problem-bg: rgba(0, 0, 0, 0.03);
-                --problem-label: #d97706; /* Darker orange/amber for contrast */
-                --problem-text: #1c1e21;
-                --machine-color: #0d9488; /* Dark teal for high contrast */
-                --time-color: #ea580c; /* High contrast orange */
-                --time-rec-color: #0284c7; /* High contrast blue */
-                --closing-form-bg: rgba(0, 0, 0, 0.03);
-            }
+    [data-theme="light"] & h1 {
+        background: linear-gradient(135deg, var(--text-main) 0%, #0056b3 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-            [data-theme="light"] & h1 {
-                background: linear-gradient(135deg, var(--text-main) 0%, #0056b3 100%);
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+    transition: background-color 0.3s, color 0.3s;
 
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                margin: 0;
-                min-height: 100vh;
-                color: var(--text-main);
-                display: flex;
-                justify-content: center;
-                padding: 40px 0;
-                transition: background-color 0.3s, color 0.3s;
-            }
 
             /* Main Content Styles */
             .main-content {
@@ -746,45 +739,41 @@ body.page-close7mean {
    Styles for record.html
    ========================================== */
 body.page-record {
+    --bg: #1a1a1a;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.05);
+    --text-main: #ffffff;
+    --input-bg: #0d1a33;
+    --input-border: #2c3e50;
+    --border: rgba(255, 255, 255, 0.1);
+    --shadow: 0 20px 50px rgba(0,0,0,0.4);
+    --btn-bg: rgba(255, 255, 255, 0.05);
+    --btn-border: rgba(255, 255, 255, 0.1);
 
-            & {
-                --bg: #1a1a1a;
-                --card-bg: rgba(255, 255, 255, 0.03);
-                --card-border: rgba(255, 255, 255, 0.05);
-                --text-main: #ffffff;
-                --input-bg: #0d1a33;
-                --input-border: #2c3e50;
-                --border: rgba(255, 255, 255, 0.1);
-                --shadow: 0 20px 50px rgba(0,0,0,0.4);
-                --btn-bg: rgba(255, 255, 255, 0.05);
-                --btn-border: rgba(255, 255, 255, 0.1);
-            }
+    [data-theme="light"] & {
+        --bg: #f0f2f5;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --text-main: #1c1e21;
+        --input-bg: #ffffff;
+        --input-border: #cccccc;
+        --border: rgba(0, 0, 0, 0.1);
+        --shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        --btn-bg: rgba(0, 0, 0, 0.04);
+        --btn-border: rgba(0, 0, 0, 0.12);
+    }
 
-            [data-theme="light"] & {
-                --bg: #f0f2f5;
-                --card-bg: rgba(255, 255, 255, 0.9);
-                --card-border: rgba(0, 0, 0, 0.08);
-                --text-main: #1c1e21;
-                --input-bg: #ffffff;
-                --input-border: #cccccc;
-                --border: rgba(0, 0, 0, 0.1);
-                --shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
-                --btn-bg: rgba(0, 0, 0, 0.04);
-                --btn-border: rgba(0, 0, 0, 0.12);
-            }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px 10px; /* Reduced padding for mobile */
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
 
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
-                padding: 20px 10px; /* Reduced padding for mobile */
-                color: var(--text-main);
-                transition: background-color 0.3s, color 0.3s;
-            }
 
             .container {
                 background: var(--card-bg);
@@ -1150,65 +1139,62 @@ body.page-record {
    Styles for dashboard.html
    ========================================== */
 body.page-dashboard {
+    --bg: #1a1a1a;
+    --bg-radial: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0d0d0d 100%);
+    --sidebar-bg: #242424;
+    --sidebar-border: #2c3e50;
+    --sidebar-text: #bdc3c7;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.05);
+    --chart-bg: rgba(255, 255, 255, 0.02);
+    --chart-border: rgba(255, 255, 255, 0.08);
+    --table-container-bg: #1f3050;
+    --th-bg: #162447;
+    --border: #2c3e50;
+    --text-main: #ffffff;
+    --text-dim: #bdc3c7;
+    --input-bg: #0d1a33;
+    --input-border: #2c3e50;
 
-            & {
-                --bg: #1a1a1a;
-                --bg-radial: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0d0d0d 100%);
-                --sidebar-bg: #242424;
-                --sidebar-border: #2c3e50;
-                --sidebar-text: #bdc3c7;
-                --card-bg: rgba(255, 255, 255, 0.03);
-                --card-border: rgba(255, 255, 255, 0.05);
-                --chart-bg: rgba(255, 255, 255, 0.02);
-                --chart-border: rgba(255, 255, 255, 0.08);
-                --table-container-bg: #1f3050;
-                --th-bg: #162447;
-                --border: #2c3e50;
-                --text-main: #ffffff;
-                --text-dim: #bdc3c7;
-                --input-bg: #0d1a33;
-                --input-border: #2c3e50;
-            }
+    [data-theme="light"] & {
+        --bg: #f0f2f5;
+        --bg-radial: radial-gradient(circle at 50% 50%, #f0f2f5 0%, #e4e6eb 100%);
+        --sidebar-bg: #ffffff;
+        --sidebar-border: rgba(0, 0, 0, 0.1);
+        --sidebar-text: #4e4f50;
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --chart-bg: #ffffff;
+        --chart-border: rgba(0, 0, 0, 0.1);
+        --table-container-bg: #ffffff;
+        --th-bg: #f0f2f5;
+        --border: rgba(0, 0, 0, 0.1);
+        --text-main: #1a1a1a;
+        --text-dim: #555555;
+        --input-bg: #ffffff;
+        --input-border: #cccccc;
+    }
 
-            [data-theme="light"] & {
-                --bg: #f0f2f5;
-                --bg-radial: radial-gradient(circle at 50% 50%, #f0f2f5 0%, #e4e6eb 100%);
-                --sidebar-bg: #ffffff;
-                --sidebar-border: rgba(0, 0, 0, 0.1);
-                --sidebar-text: #4e4f50;
-                --card-bg: rgba(255, 255, 255, 0.9);
-                --card-border: rgba(0, 0, 0, 0.08);
-                --chart-bg: #ffffff;
-                --chart-border: rgba(0, 0, 0, 0.1);
-                --table-container-bg: #ffffff;
-                --th-bg: #f0f2f5;
-                --border: rgba(0, 0, 0, 0.1);
-                --text-main: #1a1a1a;
-                --text-dim: #555555;
-                --input-bg: #ffffff;
-                --input-border: #cccccc;
-            }
+    [data-theme="light"] & .month-select {
+        background: #ffffff;
+        color: var(--text-main);
+        border: 1px solid var(--border);
+    }
 
-            [data-theme="light"] & .month-select {
-                background: #ffffff;
-                color: var(--text-main);
-                border: 1px solid var(--border);
-            }
+    * {
+        box-sizing: border-box;
+    }
+    
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    color: var(--text-main);
+    overflow: hidden;
+    overscroll-behavior-y: none; /* Prevent bounce */
+    transition: background-color 0.3s, color 0.3s;
 
-            * {
-                box-sizing: border-box;
-            }
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                margin: 0;
-                display: flex;
-                height: 100vh;
-                color: var(--text-main);
-                overflow: hidden;
-                overscroll-behavior-y: none; /* Prevent bounce */
-                transition: background-color 0.3s, color 0.3s;
-            }
 
             /* Sidebar Styles */
             .sidebar {
@@ -2254,38 +2240,34 @@ body.page-dashboard {
    Styles for help.html
    ========================================== */
 body.page-help {
+    --primary: #007BFF;
+    --primary-glow: rgba(0, 123, 255, 0.4);
+    --bg: #1a1a1a;
+    --card-bg: #242424;
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --code-bg: rgba(0, 0, 0, 0.3);
 
-            & {
-                --primary: #007BFF;
-                --primary-glow: rgba(0, 123, 255, 0.4);
-                --bg: #1a1a1a;
-                --card-bg: #242424;
-                --text: #ffffff;
-                --text-dim: rgba(255, 255, 255, 0.6);
-                --border: rgba(255, 255, 255, 0.08);
-                --code-bg: rgba(0, 0, 0, 0.3);
-            }
+    [data-theme="light"] & {
+        --bg: #f0f2f5;
+        --card-bg: #ffffff;
+        --text: #1c1e21;
+        --text-dim: rgba(0, 0, 0, 0.6);
+        --border: rgba(0, 0, 0, 0.1);
+        --code-bg: rgba(0, 0, 0, 0.05);
+    }
 
-            [data-theme="light"] & {
-                --bg: #f0f2f5;
-                --card-bg: #ffffff;
-                --text: #1c1e21;
-                --text-dim: rgba(0, 0, 0, 0.6);
-                --border: rgba(0, 0, 0, 0.1);
-                --code-bg: rgba(0, 0, 0, 0.05);
-            }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+    transition: background-color 0.3s, color 0.3s;
 
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                color: var(--text);
-                margin: 0;
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                padding: 40px 0;
-                transition: background-color 0.3s, color 0.3s;
-            }
 
             .container {
                 width: 90%;
@@ -2502,58 +2484,54 @@ body.page-help {
    Styles for history.html
    ========================================== */
 body.page-history {
+    --primary: #007BFF;
+    --primary-glow: rgba(0, 123, 255, 0.4);
+    --bg: #1a1a1a;
+    --card-bg: #161b22;
+    --text-main: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.1);
 
-            & {
-                --primary: #007BFF;
-                --primary-glow: rgba(0, 123, 255, 0.4);
-                --bg: #1a1a1a;
-                --card-bg: #161b22;
-                --text-main: #ffffff;
-                --text-dim: rgba(255, 255, 255, 0.6);
-                --border: rgba(255, 255, 255, 0.1);
-            }
+    [data-theme="light"] & {
+        --bg: #f0f2f5;
+        --card-bg: #ffffff;
+        --text-main: #1c1e21;
+        --text-dim: rgba(0, 0, 0, 0.6);
+        --border: rgba(0, 0, 0, 0.1);
+    }
 
-            [data-theme="light"] & {
-                --bg: #f0f2f5;
-                --card-bg: #ffffff;
-                --text-main: #1c1e21;
-                --text-dim: rgba(0, 0, 0, 0.6);
-                --border: rgba(0, 0, 0, 0.1);
-            }
+    [data-theme="light"] & .header h1 {
+        background: linear-gradient(135deg, var(--text-main) 0%, #0056b3 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-            [data-theme="light"] & .header h1 {
-                background: linear-gradient(135deg, var(--text-main) 0%, #0056b3 100%);
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
+    [data-theme="light"] & .btn-back {
+        background: rgba(0, 0, 0, 0.03);
+        color: var(--text-dim);
+    }
 
-            [data-theme="light"] & .btn-back {
-                background: rgba(0, 0, 0, 0.03);
-                color: var(--text-dim);
-            }
+    [data-theme="light"] & .btn-back:hover {
+        background: rgba(0, 0, 0, 0.08);
+        color: var(--text-main);
+    }
 
-            [data-theme="light"] & .btn-back:hover {
-                background: rgba(0, 0, 0, 0.08);
-                color: var(--text-main);
-            }
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-            * {
-                box-sizing: border-box;
-                -webkit-tap-highlight-color: transparent;
-            }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+    transition: background-color 0.3s, color 0.3s;
 
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                color: var(--text-main);
-                margin: 0;
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                padding: 40px 0;
-                transition: background-color 0.3s, color 0.3s;
-            }
 
             .container {
                 width: 90%;
@@ -2856,16 +2834,13 @@ body.page-history {
    Styles for sparepart.html
    ========================================== */
 body.page-sparepart {
-
-            & {
-                --primary: #007BFF;
-                --primary-glow: rgba(0, 123, 255, 0.4);
-                --bg: #1a1a1a;
-                --card-bg: #1f3050;
-                --text: #ffffff;
-                --text-dim: rgba(255, 255, 255, 0.6);
-                --border: rgba(255, 255, 255, 0.1);
-            }
+    --primary: #007BFF;
+    --primary-glow: rgba(0, 123, 255, 0.4);
+    --bg: #1a1a1a;
+    --card-bg: #1f3050;
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.1);
 
             [data-theme="light"] & {
                 --bg: #f0f2f5;
@@ -2935,17 +2910,15 @@ body.page-sparepart {
             }
 
 
-            & {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--bg);
-                color: var(--text);
-                margin: 0;
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                padding: 40px 0;
-                transition: background-color 0.3s, color 0.3s;
-            }
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+    transition: background-color 0.3s, color 0.3s;
 
             .container {
                 width: 90%;
